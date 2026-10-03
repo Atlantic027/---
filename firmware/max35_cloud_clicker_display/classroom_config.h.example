@@ -1,0 +1,16 @@
+#pragma once
+
+// Copy to classroom_config.h and fill in local values. Never publish credentials.
+#define WIFI_SSID "your-router-ssid"
+#define WIFI_PASSWORD "your-router-password"
+#define SERVER_BASE_URL "http://192.168.1.100:8080"
+#define DEVICE_TOKEN "replace-with-device-token"
+#define DEVICE_ID ""
+
+#define V2_MODE_ENABLED false
+#define V2_API_BASE_PATH "/api/v2"
+#define V2_COURSE_CODE ""
+#define V2_STUDENT_NAME ""
+#define RUSH_COUNTDOWN_SECONDS 10
+#define LCD_BL_INVERT true
+#define LCD_INVERT_COLOR true

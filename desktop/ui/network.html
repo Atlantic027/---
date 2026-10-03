@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'"><title>网络设置</title></head>
+<body><main><h1>网络设置</h1><p>请选择与学生终端相连的路由器。连接会切换电脑当前 Wi-Fi。</p>
+<button id="scan" type="button">扫描 Wi-Fi</button><select id="networks" aria-label="无线网络"></select>
+<label>密码 <input id="password" type="password" autocomplete="off" maxlength="63"></label>
+<button id="connect" type="button">连接所选网络</button><button id="refresh" type="button">刷新本机地址</button>
+<pre id="status" role="status"></pre><pre id="addresses"></pre></main><script src="/desktop-network.js"></script></body></html>

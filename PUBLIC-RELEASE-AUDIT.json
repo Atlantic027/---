@@ -1,0 +1,331 @@
+{
+  "generatedAt": "2026-10-03T13:54:51.271Z",
+  "files": 81,
+  "sensitiveValuesScanned": 3,
+  "manifest": [
+    {
+      "path": ".gitignore",
+      "sha256": "333732de30838eb9b29a5ee6c083f4eff88762d733131c46ad78dc0cc8460015"
+    },
+    {
+      "path": ".ignore",
+      "sha256": "d848d497c18118c6142a789e167a989adbc2c2227e371b0164480a6206bab443"
+    },
+    {
+      "path": "GITHUB-SETUP.md",
+      "sha256": "081930fb84c5459f38969690a114e49ddc4b1950f85475da6bd415bb172b13d7"
+    },
+    {
+      "path": "README.md",
+      "sha256": "fc012fc5049fd114f325d8633e5931948f0d0fab7452edb864f4ad094a995c26"
+    },
+    {
+      "path": "cloud-server/API.md",
+      "sha256": "2851c4251cb514a6bb8cf3ffc2ffa81f8bfe30366fcc601223e407cfb455231c"
+    },
+    {
+      "path": "cloud-server/README.md",
+      "sha256": "fd8d308b339e8477c192fd4d84f27113bb5779c6a4874bf4c5d586d1cfa9f4a5"
+    },
+    {
+      "path": "cloud-server/classroom-v2.js",
+      "sha256": "c8128fcb66d188fa718675572ef3254c7ae2d769ac39e663227a1e2e52685b94"
+    },
+    {
+      "path": "cloud-server/handwriting/README.md",
+      "sha256": "4ff29ce546e565b9a7a3b4fff3bf497e020b7f11950de9fb74f65331c556bc33"
+    },
+    {
+      "path": "cloud-server/handwriting/index.js",
+      "sha256": "40342bcfe41b3b3f19cb6c26cfd7420bfd6ddd31b4ac8c8afc14286c7a95c29d"
+    },
+    {
+      "path": "cloud-server/handwriting/models/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "cloud-server/handwriting/models/MODEL-LICENSE-MIT.txt",
+      "sha256": "6b4bfb6ed85ae0271388fe4e0d20cee4bd98dc71c3b0c48ffeb59f400e999bce"
+    },
+    {
+      "path": "cloud-server/handwriting/models/SHA256SUMS",
+      "sha256": "5ae0f845b8097960bb9abf04337a45c16bb47cb4396bbb8be8a954d249cdbb66"
+    },
+    {
+      "path": "cloud-server/handwriting/models/UPSTREAM-README.md",
+      "sha256": "6a139e68e87f153c0239b0fbfd8258807fddc59de3ec8f9da96ff2848c5756fc"
+    },
+    {
+      "path": "cloud-server/handwriting/models/manifest.json",
+      "sha256": "28064a10a192ca60befcc582d80eb944f6c5eccf7ebffbf1107debfd2d89ce4c"
+    },
+    {
+      "path": "cloud-server/handwriting/models/mnist-12.onnx",
+      "sha256": "5c688690f8bacf667d4c2074af5ad0646ca328d7ab03eccf944a65b320171bdd"
+    },
+    {
+      "path": "cloud-server/handwriting/package-lock.json",
+      "sha256": "aff5baade5c2729a6cb8490140b8ec5eeda3cd66f2d5d6782bba5a72cfa30aaf"
+    },
+    {
+      "path": "cloud-server/handwriting/package.json",
+      "sha256": "5d85b6ef09bbeb8fa2eb94038903422a7dee79be91650e4a5ec632bd48ae4912"
+    },
+    {
+      "path": "cloud-server/handwriting/scripts/download-assets.js",
+      "sha256": "c76428ed5da7847b46255619ed612a9fba3d38a619bfb5b51bc94b02d73de377"
+    },
+    {
+      "path": "cloud-server/handwriting/scripts/evaluate.js",
+      "sha256": "3b1d453d13fd6cc4743921b6722aa299c7b3fe61ea054c9b56820ca0d0633f9a"
+    },
+    {
+      "path": "cloud-server/handwriting/tests/dataset.js",
+      "sha256": "49516cb6895c18128da52a5001446197336ede5b01ad563d6e36729e306b36eb"
+    },
+    {
+      "path": "cloud-server/handwriting/tests/fixtures/README.md",
+      "sha256": "fec3c977a3e6dc286c09d8bfa3ec1350a1d902774f2e9b375619777f1c960f9b"
+    },
+    {
+      "path": "cloud-server/handwriting/tests/fixtures/manifest.json",
+      "sha256": "fbf243773c8da3b6c480b5fd1543f8c9ba9fd38991add7660386db028063c36c"
+    },
+    {
+      "path": "cloud-server/handwriting/tests/fixtures/pendigits.tes",
+      "sha256": "8bd03229c5c5291fefe43e45465dd948d2645bf23328b9d993e0b777666b2015"
+    },
+    {
+      "path": "cloud-server/handwriting/tests/recognize.test.js",
+      "sha256": "2e152100857518e9e383c13df656bd90eb40eb379b794a7d7fb3a514c086d780"
+    },
+    {
+      "path": "cloud-server/package-lock.json",
+      "sha256": "51d5c6af9b2935e0c031dc4f15d76f364c64ae4e653a373af533585946e5046a"
+    },
+    {
+      "path": "cloud-server/package.json",
+      "sha256": "554a3950668cfba01fc7206613a86a716eab3ea0454480f6a0dd817f60e83fc2"
+    },
+    {
+      "path": "cloud-server/public/index.html",
+      "sha256": "451d8d8967c62357346087ee0733bbb2e7e1c88ea49d3aac7c9e1be23843601d"
+    },
+    {
+      "path": "cloud-server/public/student-v2.html",
+      "sha256": "b9528cdf14d672bb1c302d6749f88cc207838de40deed70e6cf06b6aafa5b53d"
+    },
+    {
+      "path": "cloud-server/public/teacher-v2.html",
+      "sha256": "69ce6bc34000e7dfdb80178810a59fb39e426161b45318df232bf7cf115e6083"
+    },
+    {
+      "path": "cloud-server/server.js",
+      "sha256": "afbfb18849dad28cd6487c09a747938b3344775df88cb55f1edbe33e5f375783"
+    },
+    {
+      "path": "cloud-server/test/server.test.js",
+      "sha256": "a8d674d102e3af810b9944dc52e46da90cdee78cadbbf3cb843fef06748a7f02"
+    },
+    {
+      "path": "cloud-server/test/v2.next.test.js",
+      "sha256": "5b879f30ebef9ece82dacf8b26cc59f5ec12ca9fa9e81545333ecc394978c5b4"
+    },
+    {
+      "path": "cloud-server/test/v2.test.js",
+      "sha256": "2d63e2bd6789451a8ac4856d882a16874e2c6dfcd5d4139d72e0b48e92988794"
+    },
+    {
+      "path": "desktop/.gitignore",
+      "sha256": "107bcff188fd64fba204f40e9344eb29eb90388aac931b25b4fc684498cc5b8e"
+    },
+    {
+      "path": "desktop/DESIGNER-BRIDGE.md",
+      "sha256": "238300b418ffd9ad78f0826c5aa7435ec72fe38ce3afa84d426609c6eb0b9450"
+    },
+    {
+      "path": "desktop/main/discovery.cjs",
+      "sha256": "8bdea730b4459b01ed920ffc822d53ba52914b0812ff578496b626442e3ffe21"
+    },
+    {
+      "path": "desktop/main/handwriting.cjs",
+      "sha256": "c5a36a288496575ce6801e4963fd02a2e33b4638902a710e08ef0dd822a90953"
+    },
+    {
+      "path": "desktop/main/main.cjs",
+      "sha256": "40549299e648a000740b4ecaf3c86c71231ffcfbc872907e5e97174bc599fa52"
+    },
+    {
+      "path": "desktop/main/security.cjs",
+      "sha256": "a27352c538298bf4756d4525c93b4de40f672821884fe7bce9226ffae75c5417"
+    },
+    {
+      "path": "desktop/network/WlanHelper.cs",
+      "sha256": "369842aa7a124c5e7e79597685a91751d25b607c466d809bd29bd225274cac58"
+    },
+    {
+      "path": "desktop/network/network.cjs",
+      "sha256": "ea49f09194c56b190177c707688cca045ad44e5aa0f331063330c9a411702671"
+    },
+    {
+      "path": "desktop/package-lock.json",
+      "sha256": "ea3530db2dbac1e78db4203e3b534e93244f95566c9b35adde23b1b00da92283"
+    },
+    {
+      "path": "desktop/package.json",
+      "sha256": "82eef39db9afbfbb4f765a1dbfa01887f3fec1a001532506e5cd071473baa168"
+    },
+    {
+      "path": "desktop/preload/preload.cjs",
+      "sha256": "03e4a705f718fc6307a72a4d5220eba2b019eacfc7b588ded9c9ac3acd369073"
+    },
+    {
+      "path": "desktop/scripts/audit-package.cjs",
+      "sha256": "fb735e40fa8e2263809d12c0ae1a390c2e869c0b6436b2715e9a0568ed134a52"
+    },
+    {
+      "path": "desktop/scripts/prepare.cjs",
+      "sha256": "2b759947b87a1dcc102599804cf5c976c82ab518f8da1713cc730cc9480a9847"
+    },
+    {
+      "path": "desktop/scripts/reset-install.cjs",
+      "sha256": "d7f5c5c7bd3000852af0e2154aaaf0a5682b0335f49e2ed3043d234c0f5afbbb"
+    },
+    {
+      "path": "desktop/scripts/resources.cjs",
+      "sha256": "92feb40f31cae5ed0f54d3509bbe2117a7820e90dc3d2d06671d26fcb0634b5b"
+    },
+    {
+      "path": "desktop/scripts/verify-exe.cjs",
+      "sha256": "2a81b350f4a051747d97a0302ca41c0e57ef1564ba1fbfde3a66ea12b581ea2a"
+    },
+    {
+      "path": "desktop/tests/discovery.test.cjs",
+      "sha256": "8ba96dde6e54b6baa13c059d3993558ebc03e95eda74490f19dd934e9c7f5a3b"
+    },
+    {
+      "path": "desktop/tests/ipc.test.cjs",
+      "sha256": "aa686c6e519bfa2b84dbcfd84fc268962c04075759bbc9d6bcbfd66d422809de"
+    },
+    {
+      "path": "desktop/tests/manifest.test.cjs",
+      "sha256": "40c3496d28e601b602f422bd82f2fb4e92d642ad5f57f44422b856f2131189ec"
+    },
+    {
+      "path": "desktop/tests/network.test.cjs",
+      "sha256": "931eac4573547d2ec072bc9a3f75c4c8d4048ae356401cbf24f5a06d5b8ad0cb"
+    },
+    {
+      "path": "desktop/ui/network.html",
+      "sha256": "58f60141be5daa62e4727dcb7598b9edb3f76d5bfef58526c9456d373379d994"
+    },
+    {
+      "path": "desktop/ui/network.js",
+      "sha256": "c22e40daeee916b81dd69131994bc5a5134b5050734fed08872b656f4caef674"
+    },
+    {
+      "path": "firmware/libraries/ClassroomClient/library.properties",
+      "sha256": "bac5bb382f02f6f87e1efe1735019af5c7c7c8e8952b573d25287849abf0f598"
+    },
+    {
+      "path": "firmware/libraries/ClassroomClient/src/ClassroomClient.h",
+      "sha256": "ae27528b6f7316db871f78bda00bf3613dd43aaabbd795690e51852956a6619b"
+    },
+    {
+      "path": "firmware/max35_cloud_clicker/README.md",
+      "sha256": "d03c16c518aae35127360d5e02f620257caa041c3b01c65d441046e2156c4dfd"
+    },
+    {
+      "path": "firmware/max35_cloud_clicker/classroom_config.h.example",
+      "sha256": "26fd8d2877beacefa447f45b74af84a3d1fe62f5b13b3946f70f1df82debd706"
+    },
+    {
+      "path": "firmware/max35_cloud_clicker/max35_cloud_clicker.ino",
+      "sha256": "99834924922ad94e98844afd1ec2272c7e45a39994aba738c461d979d6a00e6c"
+    },
+    {
+      "path": "firmware/max35_cloud_clicker_display/README.md",
+      "sha256": "0d9015f846db6eeefaba931a3fc6f02898468f6d5fb664802396cc22ad6556eb"
+    },
+    {
+      "path": "firmware/max35_cloud_clicker_display/camera_hal.h",
+      "sha256": "8414a5385db6776940af3536398fedb5b785e2daa2aae14d3c7df07a113a0ad5"
+    },
+    {
+      "path": "firmware/max35_cloud_clicker_display/classroom_config.h.example",
+      "sha256": "43ab85025fa886c628327849b846c83298d2079fcbc0d5f0972cf5845a0ab4d6"
+    },
+    {
+      "path": "firmware/max35_cloud_clicker_display/display_hal.h",
+      "sha256": "3e8e564117c7610dd8b51cf5655893a380912eb8634609dac0d134ffc1708023"
+    },
+    {
+      "path": "firmware/max35_cloud_clicker_display/max35_cloud_clicker_display.ino",
+      "sha256": "2f5bb3b64cd1c297aef51b5d8d0e89884ea523a1ba98a4a522360645b9038080"
+    },
+    {
+      "path": "launcher/.gitignore",
+      "sha256": "bef50ad462bd3a2460288a261d507700b2fd5b47ae4aafeeb249b856d5a31f09"
+    },
+    {
+      "path": "launcher/PACKAGE-MANIFEST.md",
+      "sha256": "c3f3c4622a245796babacfe32758027cd191ffed77fa45e20e218ed0c5b8716b"
+    },
+    {
+      "path": "launcher/configure-classroom.ps1",
+      "sha256": "60fe6391844ac2f065089a2f69af52e62eea793b80da1705834c7b1e61ce3c68"
+    },
+    {
+      "path": "launcher/start-classroom.cmd",
+      "sha256": "98301c296b049a0fedce1a3acc58e6017c1743cf032d8f9ae01b5967d5338ece"
+    },
+    {
+      "path": "launcher/start-classroom.ps1",
+      "sha256": "dd191db566f766b9b2b8491c6688442a80b538bb25985b168cc28bfe1db3773b"
+    },
+    {
+      "path": "launcher/start-student-v2.cmd",
+      "sha256": "41078486900562b16014dd5bd641aabcf88e9dadd4b7cad2a58a003c937dd1bf"
+    },
+    {
+      "path": "launcher/start-student-v2.ps1",
+      "sha256": "6d16defa8cfa9b3c920586a4348b98651b1082c419b18523e31cd3481985918f"
+    },
+    {
+      "path": "launcher/stop-classroom.cmd",
+      "sha256": "aa8210b55586d8ea678e485b9e6631541875fca266b83c033b8cc00355ff75fc"
+    },
+    {
+      "path": "launcher/stop-classroom.ps1",
+      "sha256": "cd59f7d96f9eff8387dc3998d524938c71a0336d8d45d304c15397efc4d2cae6"
+    },
+    {
+      "path": "launcher/student-v2.html",
+      "sha256": "a1d1bfcff86a0fd2332201f6c10bdd81abd1585908848965eb7c07de813a5ce9"
+    },
+    {
+      "path": "launcher/teacher-v2.html",
+      "sha256": "5c5270e4c02de9cbab203b021d1022336f621c692d8e492a9bda764ab5f0caff"
+    },
+    {
+      "path": "models/README.md",
+      "sha256": "c2e8e7984778c9a2d76f91eb83a0a920d250bd499ab0a49c62094e31053bab66"
+    },
+    {
+      "path": "models/max35_terminal.scad",
+      "sha256": "065648199f0f46f49e44a5dea2458335fc73f7d390ec7f8ddc18f1a96187bc20"
+    },
+    {
+      "path": "tools/check-page-scripts.cjs",
+      "sha256": "ce445699f6478a15cb071376a7ad74bfe582d046980e36967537eb5f7c826b3c"
+    },
+    {
+      "path": "tools/create-public-release.cjs",
+      "sha256": "900e0e06fe952b3b83411c1d6b4d9e9f92b8c40611f1eea5bf6120f1e345a9a7"
+    },
+    {
+      "path": "tools/export-github.cjs",
+      "sha256": "36aee8ee6a5a9975b241e6b8a3919d470d47d3c0645b6dbfd25c540398e0f7e5"
+    }
+  ]
+}

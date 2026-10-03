@@ -1,0 +1,8 @@
+{
+  "source": "https://github.com/onnx/models/raw/refs/heads/main/validated/vision/classification/mnist/model/mnist-12.onnx?download=1",
+  "pointerUrl": "https://api.github.com/repos/onnx/models/git/blobs/dd60a90ebfcb1afb61a46cf0a99081a0fd951bc8",
+  "sha256": "5c688690f8bacf667d4c2074af5ad0646ca328d7ab03eccf944a65b320171bdd",
+  "bytes": 26143,
+  "license": "MIT",
+  "licenseSource": "https://api.github.com/repos/onnx/models/contents/validated/vision/classification/mnist/README.md"
+}

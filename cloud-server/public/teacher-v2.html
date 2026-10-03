@@ -1,0 +1,2070 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MAX35 云课堂 · 教师控制台 v2</title>
+  <style>
+    :root {
+      --bg: #090e17;
+      --bg-panel: #111a2e;
+      --bg-panel-alt: #16223b;
+      --bg-card: #1c2b48;
+      --bg-card-hover: #223558;
+      --border: #233554;
+      --border-light: #32476d;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-glow: rgba(59, 130, 246, 0.25);
+      --accent: #06b6d4;
+      --accent-glow: rgba(6, 182, 212, 0.2);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.2);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.12);
+      --purple: #8b5cf6;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    .panel, .mode-card, .form-group, .vocab-option-item, .table-responsive { min-width: 0; }
+    .vocab-option-item input[type="text"], .bind-form select { min-width: 0; }
+    .hero-title, .curr-question-text, .curr-option-pill { overflow-wrap: anywhere; }
+    .hero-meta, .bind-form { flex-wrap: wrap; }
+    .modal-box { max-height: 90vh; overflow-y: auto; }
+    @media (max-width: 600px) {
+      main { padding: 12px !important; }
+      .onboarding-card { padding: 24px 16px !important; width: 100%; }
+      .mode-card-header, .panel-header { flex-wrap: wrap; }
+      .curr-options-list { grid-template-columns: 1fr !important; }
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(ellipse at 20% 0%, rgba(30, 58, 138, 0.25) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(14, 116, 144, 0.2) 0%, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 顶部导航 */
+    header {
+      background: rgba(17, 26, 46, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      color: #fff;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge-v2 {
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .course-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      padding: 6px 14px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .course-chip-title {
+      font-weight: 600;
+      color: var(--text-main);
+      max-width: 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .course-chip-code {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(6, 182, 212, 0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 1.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .poll-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .poll-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      transition: transform 0.2s;
+    }
+    .poll-dot.pulse {
+      transform: scale(1.4);
+    }
+    .poll-dot.error {
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+
+    /* 按钮与输入框 */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+      outline: none;
+      user-select: none;
+    }
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+    .btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+    .btn-secondary {
+      background: var(--bg-card);
+      border-color: var(--border-light);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--bg-card-hover);
+      border-color: var(--primary);
+    }
+    .btn-accent {
+      background: #0891b2;
+      color: #fff;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .btn-accent:hover:not(:disabled) {
+      background: #0e7490;
+    }
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    input, select, textarea {
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text-main);
+      background: rgba(17, 26, 46, 0.7);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-glow);
+    }
+    input::placeholder, textarea::placeholder {
+      color: var(--text-dim);
+    }
+
+    /* 消息条 */
+    .alert-bar {
+      margin: 16px 24px 0 24px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      animation: slideDown 0.25s ease-out;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .alert-danger {
+      background: var(--danger-bg);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+    .alert-success {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #86efac;
+    }
+    .alert-close {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 2px 6px;
+      opacity: 0.7;
+    }
+    .alert-close:hover { opacity: 1; }
+
+    /* 主体布局 */
+    main {
+      flex: 1;
+      padding: 24px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* 首次引导/无课程创建视图 */
+    .onboarding-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      max-width: 640px;
+      margin: 40px auto;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+      text-align: center;
+    }
+    .onboarding-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .onboarding-desc {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+    }
+
+    /* 课程顶部信息与大课程码展台 */
+    .course-hero {
+      background: linear-gradient(135deg, rgba(22, 34, 59, 0.95), rgba(17, 26, 46, 0.95));
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    .hero-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .hero-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .hero-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .hero-code-box {
+      background: rgba(9, 14, 23, 0.6);
+      border: 2px dashed rgba(6, 182, 212, 0.4);
+      border-radius: var(--radius);
+      padding: 12px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .hero-code-box:hover {
+      border-color: var(--accent);
+      background: rgba(6, 182, 212, 0.08);
+      transform: translateY(-2px);
+    }
+    .code-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .code-digits {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: 5px;
+      color: var(--accent);
+      text-shadow: 0 0 16px var(--accent-glow);
+    }
+    .code-hint {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* 模式卡片栏 (3个同级模式) */
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .modes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 960px) {
+      .modes-grid { grid-template-columns: 1fr; }
+    }
+    .mode-card {
+      background: var(--bg-panel);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all 0.2s ease-in-out;
+      position: relative;
+      overflow: hidden;
+    }
+    .mode-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: transparent;
+      transition: background 0.2s;
+    }
+    .mode-card.active-classroom::before { background: var(--primary); }
+    .mode-card.active-vocabulary::before { background: var(--purple); }
+    .mode-card.active-arithmetic::before { background: var(--accent); }
+
+    .mode-card.disabled {
+      opacity: 0.65;
+      background: rgba(17, 26, 46, 0.5);
+    }
+    .mode-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .mode-icon-name {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .mode-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .mode-icon.classroom { background: rgba(59, 130, 246, 0.15); color: var(--primary); }
+    .mode-icon.vocabulary { background: rgba(139, 92, 246, 0.15); color: var(--purple); }
+    .mode-icon.arithmetic { background: rgba(6, 182, 212, 0.15); color: var(--accent); }
+
+    .mode-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .mode-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* 开关 switch */
+    .switch-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .switch-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: .25s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--success);
+    }
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    input:disabled + .slider {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+
+    .mode-card-body {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .mode-card-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* 启动活动操作区 & 当前活动监控 */
+    .activity-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 1024px) {
+      .activity-section { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .panel-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 活动发起 Tabs */
+    .tab-bar {
+      display: flex;
+      background: rgba(17, 26, 46, 0.7);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      gap: 4px;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px var(--primary-glow);
+    }
+    .tab-btn:hover:not(.active) {
+      color: var(--text-main);
+      background: var(--bg-card);
+    }
+
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .tab-content.active {
+      display: flex;
+    }
+
+    .vocab-options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 600px) {
+      .vocab-options-grid { grid-template-columns: 1fr; }
+    }
+    .vocab-option-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .vocab-option-item.correct {
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .vocab-option-item input[type="radio"] {
+      cursor: pointer;
+      accent-color: var(--success);
+    }
+    .vocab-option-item input[type="text"] {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 4px;
+    }
+    .vocab-option-item input[type="text"]:focus {
+      box-shadow: none;
+    }
+
+    /* 当前活动指示牌 */
+    .current-activity-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 220px;
+      justify-content: center;
+    }
+    .current-activity-card.empty {
+      text-align: center;
+      color: var(--text-dim);
+    }
+    .curr-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      width: fit-content;
+      font-weight: 600;
+    }
+    .badge-vocab { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.4); }
+    .badge-arith { background: rgba(6, 182, 212, 0.2); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.4); }
+    .badge-class { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
+
+    .curr-question-text {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      font-family: var(--font-mono);
+      letter-spacing: 0.5px;
+    }
+    .curr-options-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .curr-option-pill {
+      background: var(--bg-panel);
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .curr-option-pill.is-correct {
+      border-color: var(--success);
+      color: #86efac;
+      background: rgba(16, 185, 129, 0.1);
+      font-weight: 600;
+    }
+
+    /* 下半部分：成员、设备绑定与正确率看板 */
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 1024px) {
+      .data-grid { grid-template-columns: 1fr; }
+    }
+
+    /* 统一表格设计 */
+    .table-responsive {
+      overflow-x: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    th {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .role-badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .role-teacher { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+    .role-student { background: rgba(16, 185, 129, 0.2); color: #a7f3d0; }
+
+    .tag-device {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .rate-bar-container {
+      width: 100%;
+      background: #273746;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .rate-bar-fill {
+      height: 100%;
+      background: var(--success);
+      border-radius: 3px;
+    }
+
+    /* 设备绑定弹框 / 内联表单 */
+    .bind-form {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .bind-form input {
+      max-width: 160px;
+    }
+
+    /* 快捷预设题按钮组 */
+    .preset-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .preset-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset-chip:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border-color: var(--border-light);
+    }
+
+    /* Modal 弹窗 */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-box {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+      padding: 16px 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部导航 -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">云</div>
+      <div class="brand-title">
+        MAX35 云课堂
+        <span class="badge-v2">v2 教师端</span>
+      </div>
+    </div>
+
+    <div class="header-center" id="headerCourseSection" style="display: none;">
+      <div class="course-chip">
+        <span class="course-chip-title" id="chipCourseTitle">数学课</span>
+        <span class="course-chip-code" id="chipCourseCode" title="点击复制课程码">------</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <a class="btn btn-secondary btn-sm" href="/">ESP32 答题 / 抢答 / 照片</a>
+      <div class="poll-indicator">
+        <span class="poll-dot" id="pollDot"></span>
+        <span id="pollStatusText">轮询准备中</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="btnManualRefresh" title="立即刷新数据">
+        ↻ 刷新
+      </button>
+      <button class="btn btn-secondary btn-sm" id="btnSwitchCourse" style="display: none;">
+        切换/创建课程
+      </button>
+    </div>
+  </header>
+
+  <!-- 全局提示条 -->
+  <div id="alertBox" class="alert-bar alert-danger" style="display: none;">
+    <span id="alertMsg">发生错误</span>
+    <button class="alert-close" onclick="hideAlert()">&times;</button>
+  </div>
+
+  <main>
+    <!-- 引导：创建或恢复课程 -->
+    <div id="viewOnboarding" class="onboarding-card">
+      <h2 class="onboarding-title">开启课堂教学</h2>
+      <p class="onboarding-desc">创建全新的多班级多模式课堂，获取专属 6 位课程码，或者输入已有课程凭证继续授课。</p>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label>教师姓名</label>
+          <input type="text" id="inputTeacherName" placeholder="例如：张老师" value="张老师">
+        </div>
+        <div class="form-group">
+          <label>课程名称</label>
+          <input type="text" id="inputCourseTitle" placeholder="例如：三年级二班英语与算数" value="趣味互动课堂">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-primary" id="btnCreateCourse" style="min-width: 140px;">
+          创建新课程
+        </button>
+        <button class="btn btn-secondary" id="btnShowResumeModal">
+          输入 Token 恢复已有课程
+        </button>
+      </div>
+    </div>
+
+    <!-- 教师控制台主面板 -->
+    <div id="viewDashboard" style="display: none; flex-direction: column; gap: 24px;">
+      
+      <!-- 课程展台 -->
+      <section class="course-hero">
+        <div class="hero-info">
+          <div class="hero-title-row">
+            <h1 class="hero-title" id="dashCourseTitle">--</h1>
+            <span class="role-badge role-teacher">授课教师</span>
+          </div>
+          <div class="hero-meta">
+            <span>教师：<strong id="dashTeacherName">--</strong></span>
+            <span>学生总数：<strong id="dashStudentCount">0</strong> 人</span>
+            <span>绑定设备：<strong id="dashDeviceCount">0</strong> 台</span>
+          </div>
+        </div>
+
+        <div class="hero-code-box" id="heroCodeBox" title="点击复制课程码分享给学生">
+          <span class="code-label">学生加入课程码</span>
+          <span class="code-digits" id="dashCourseCode">------</span>
+          <span class="code-hint">点击一键复制 📋</span>
+        </div>
+      </section>
+
+      <section class="activity-section">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title"><span>🖼️ 学生图片与教师批注</span></div><span id="photoSummary" class="badge-v2">0 张图片</span></div>
+          <div id="photoAnnotationList" style="display:flex;flex-direction:column;gap:12px;"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title"><span>📊 本地学习分析助手</span></div><span class="badge-v2">仅本机规则分析</span></div>
+          <p style="font-size:12px;color:var(--text-muted);">根据作答量、正确率和教师批注生成可解释的教学建议，不调用外部 AI，不上传课堂数据。</p>
+          <div id="learningInsightsList" style="display:flex;flex-direction:column;gap:12px;"><div style="color:var(--text-dim);">加载中...</div></div>
+        </div>
+      </section>
+
+      <!-- 首页三个同级模式：上课 / 背单词 / 算数 -->
+      <section>
+        <div class="section-title">
+          <span>教学运行模式</span>
+          <span style="font-size: 12px; font-weight: normal; color: var(--text-dim);">(三个同级教学模式，可独立开关词汇与算数)</span>
+        </div>
+        <div class="modes-grid">
+          
+          <!-- 模式 1: 课堂基础模式 -->
+          <div class="mode-card active-classroom" id="cardModeClassroom">
+            <div>
+              <div class="mode-card-header">
+                <div class="mode-icon-name">
+                  <div class="mode-icon classroom">🏫</div>
+                  <div>
+                    <div class="mode-name">常规上课</div>
+                    <div class="mode-desc">核心基础模式 (默认开启)</div>
+                  </div>
+                </div>
+                <div class="switch-wrap">
+                  <span class="switch-label">始终启用</span>
+                  <label class="switch">
+                    <input type="checkbox" id="switchClassroom" checked disabled>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="mode-card-body" style="margin-top: 14px;">
+                支持班级日常互动、学生加入、智能点名和硬件按键抢答互动。
+              </div>
+            </div>
+            <div class="mode-card-footer">
+              <span class="badge-v2" style="background: rgba(59,130,246,0.1); color: var(--primary); border-color: rgba(59,130,246,0.3);">
+                系统默认
+              </span>
+            </div>
+          </div>
+
+          <!-- 模式 2: 背单词模式 -->
+          <div class="mode-card active-vocabulary" id="cardModeVocabulary">
+            <div>
+              <div class="mode-card-header">
+                <div class="mode-icon-name">
+                  <div class="mode-icon vocabulary">📖</div>
+                  <div>
+                    <div class="mode-name">背单词</div>
+                    <div class="mode-desc">四选一词汇互动模式</div>
+                  </div>
+                </div>
+                <div class="switch-wrap">
+                  <span class="switch-label" id="labelSwitchVocabulary">已关闭</span>
+                  <label class="switch">
+                    <input type="checkbox" id="switchVocabulary">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="mode-card-body" style="margin-top: 14px;">
+                开启后可发布英文单词与4个中文释义，硬件或网页端输入 0-3（A-D）选择正确含义。
+              </div>
+            </div>
+            <div class="mode-card-footer">
+              <button class="btn btn-secondary btn-sm" id="btnQuickGoVocab">
+                发布单词 &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- 模式 3: 算数模式 -->
+          <div class="mode-card active-arithmetic" id="cardModeArithmetic">
+            <div>
+              <div class="mode-card-header">
+                <div class="mode-icon-name">
+                  <div class="mode-icon arithmetic">🧮</div>
+                  <div>
+                    <div class="mode-name">快速算数</div>
+                    <div class="mode-desc">表达式计算竞答模式</div>
+                  </div>
+                </div>
+                <div class="switch-wrap">
+                  <span class="switch-label" id="labelSwitchArithmetic">已关闭</span>
+                  <label class="switch">
+                    <input type="checkbox" id="switchArithmetic">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="mode-card-body" style="margin-top: 14px;">
+                开启后可发布四则运算表达式（如 7 * 6）或数值问答，云端自动核验计算结果。
+              </div>
+            </div>
+            <div class="mode-card-footer">
+              <button class="btn btn-secondary btn-sm" id="btnQuickGoArith">
+                发布算数 &rarr;
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 活动发起与当前活动展示 -->
+      <section class="activity-section">
+        
+        <!-- 左侧：发起活动 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>🚀 发布随堂活动</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-dim);">发布后立即推送给学生</span>
+          </div>
+
+          <div class="tab-bar">
+            <button class="tab-btn active" id="tabBtnVocab" onclick="switchActivityTab('vocabulary')">
+              背单词 (Vocabulary)
+            </button>
+            <button class="tab-btn" id="tabBtnArith" onclick="switchActivityTab('arithmetic')">
+              算数 (Arithmetic)
+            </button>
+          </div>
+
+          <!-- 背单词表单 -->
+          <div class="tab-content active" id="tabContentVocab">
+            <div class="preset-bar">
+              <span style="font-size: 11px; color: var(--text-dim);">预设例题：</span>
+              <span class="preset-chip" onclick="applyVocabPreset('apple', ['苹果', '香蕉', '梨', '西瓜'], 0)">apple (苹果)</span>
+              <span class="preset-chip" onclick="applyVocabPreset('gravity', ['重力/引力', '磁力', '速度', '温度'], 0)">gravity (引力)</span>
+              <span class="preset-chip" onclick="applyVocabPreset('algorithm', ['航天器', '算法/计算程序', '代数题', '生物钟'], 1)">algorithm (算法)</span>
+            </div>
+
+            <div class="form-group">
+              <label>目标单词 / 短语</label>
+              <input type="text" id="vocabWord" placeholder="输入英文单词，如：apple">
+            </div>
+
+            <div class="form-group">
+              <label>四个中文释义选项（点击单选按钮指定正解项）</label>
+              <div class="vocab-options-grid">
+                <div class="vocab-option-item correct" id="vocabWrap0">
+                  <input type="radio" name="vocabCorrect" value="0" checked onchange="updateVocabOptionStyle()">
+                  <span>A:</span>
+                  <input type="text" id="vocabOpt0" placeholder="选项 A 释义" value="苹果">
+                </div>
+                <div class="vocab-option-item" id="vocabWrap1">
+                  <input type="radio" name="vocabCorrect" value="1" onchange="updateVocabOptionStyle()">
+                  <span>B:</span>
+                  <input type="text" id="vocabOpt1" placeholder="选项 B 释义" value="香蕉">
+                </div>
+                <div class="vocab-option-item" id="vocabWrap2">
+                  <input type="radio" name="vocabCorrect" value="2" onchange="updateVocabOptionStyle()">
+                  <span>C:</span>
+                  <input type="text" id="vocabOpt2" placeholder="选项 C 释义" value="梨">
+                </div>
+                <div class="vocab-option-item" id="vocabWrap3">
+                  <input type="radio" name="vocabCorrect" value="3" onchange="updateVocabOptionStyle()">
+                  <span>D:</span>
+                  <input type="text" id="vocabOpt3" placeholder="选项 D 释义" value="桃">
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" id="btnPublishVocab">
+              发布此单词活动
+            </button>
+          </div>
+
+          <!-- 算数表单 -->
+          <div class="tab-content" id="tabContentArith">
+            <div class="preset-bar">
+              <span style="font-size: 11px; color: var(--text-dim);">预设例题：</span>
+              <span class="preset-chip" onclick="applyArithPreset('7 * 6', '')">7 * 6 (自动计算)</span>
+              <span class="preset-chip" onclick="applyArithPreset('125 + 375', '')">125 + 375</span>
+              <span class="preset-chip" onclick="applyArithPreset('99 / 3', '')">99 / 3</span>
+              <span class="preset-chip" onclick="applyArithPreset('2^10 = ?', '1024')">2^10 (手动指定1024)</span>
+            </div>
+
+            <div class="form-group">
+              <label>计算表达式 (支持 + - * /)</label>
+              <input type="text" id="arithExpr" placeholder="例如：7 * 6 或 48 + 52" value="7 * 6">
+            </div>
+
+            <div class="form-group">
+              <label>标准答案 (若表达式为标准二元四则运算可留空，服务端自动计算)</label>
+              <input type="text" id="arithAns" placeholder="留空则服务端自动计算，或手动填数字">
+            </div>
+
+            <button class="btn btn-accent" id="btnPublishArith">
+              发布此算数活动
+            </button>
+          </div>
+
+        </div>
+
+        <!-- 右侧：当前正在进行的活动看板 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>📡 当前课堂正在进行的活动</span>
+            </div>
+            <span class="badge-v2" id="currentPollTag">实时同步</span>
+          </div>
+
+          <div class="current-activity-card" id="currActivityDisplay">
+            <div class="curr-badge badge-class">待发布</div>
+            <div class="curr-question-text" style="color: var(--text-muted); font-size: 16px;">
+              当前暂无进行中的活动，请在左侧选择单词或算数进行发布。
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 课程成员、设备绑定与作答统计 -->
+      <section class="data-grid">
+        
+        <!-- 成员与正确率看板 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>👥 成员列表与自主练习统计</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-dim);" id="memberSummary">0 名学生</span>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>学生 / 成员</th>
+                  <th>绑定设备</th>
+                   <th>词汇练习正确率</th>
+                   <th>手写速算正确率</th>
+                </tr>
+              </thead>
+              <tbody id="memberTableBody">
+                <tr><td colspan="4" style="text-align: center; color: var(--text-dim);">加载中...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 硬件设备绑定管理 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>📱 智能硬件设备绑定</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-dim);" id="deviceSummary">0 台设备</span>
+          </div>
+
+          <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+            <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">手动绑定设备至学生</div>
+            <div class="bind-form">
+              <input type="text" id="bindDeviceId" placeholder="设备 ID (如 tablet-1)">
+              <select id="bindStudentSelect" style="flex: 1;">
+                <option value="">-- 选择学生 --</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" id="btnSubmitBind">绑定设备</button>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="margin-top: 10px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>设备 ID</th>
+                  <th>归属学生</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="deviceTableBody">
+                <tr><td colspan="3" style="text-align: center; color: var(--text-dim);">暂无已绑定的硬件设备</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 恢复课程 Modal -->
+  <div class="modal-backdrop" id="modalResume">
+    <div class="modal-box">
+      <h3 class="modal-title">恢复已有课程</h3>
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label>课程 ID (Course ID)</label>
+        <input type="text" id="resumeCourseId" placeholder="例如：123e4567-e89b-12d3-a456-426614174000">
+      </div>
+      <div class="form-group">
+        <label>教师 Token (Teacher Token)</label>
+        <input type="text" id="resumeTeacherToken" placeholder="例如：48位十六进制密钥">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeResumeModal()">取消</button>
+        <button class="btn btn-primary" id="btnConfirmResume">连接课程</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    MAX35 Cloud Classroom · v2 Multi-classroom Architecture · 纯前端无第三方外链 · 支持离线/局域网部署
+  </footer>
+
+  <script>
+    // ==========================================
+    // 状态管理与初始化
+    // ==========================================
+    const STORAGE_KEY = 'max35_v2_teacher_session';
+    
+    let currentSession = {
+      courseId: '',
+      teacherToken: '',
+      courseCode: '',
+      title: '',
+      teacherName: ''
+    };
+
+    let pollTimer = null;
+    let isPolling = false;
+    const photoPreviewUrls = new Map();
+
+    // 页面加载恢复
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSavedSession();
+      setupEventListeners();
+      if (currentSession.courseId && currentSession.teacherToken) {
+        showDashboard();
+        pollAllData();
+        startPolling();
+      } else {
+        showOnboarding();
+      }
+    });
+
+    function loadSavedSession() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.courseId && parsed.teacherToken) {
+            currentSession = parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('读取本地教师会话失败:', e);
+      }
+    }
+
+    function saveSession(data) {
+      currentSession = { ...currentSession, ...data };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(currentSession));
+      } catch (e) {
+        console.warn('存储本地教师会话失败:', e);
+      }
+    }
+
+    function clearSession() {
+      currentSession = { courseId: '', teacherToken: '', courseCode: '', title: '', teacherName: '' };
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
+      stopPolling();
+      showOnboarding();
+    }
+
+    // ==========================================
+    // API 客户端封装
+    // ==========================================
+    async function apiRequest(method, url, body) {
+      const headers = { 'Content-Type': 'application/json' };
+      if (currentSession.teacherToken) {
+        headers['Authorization'] = 'Bearer ' + currentSession.teacherToken;
+      }
+      const options = { method, headers };
+      if (body !== undefined) {
+        options.body = JSON.stringify(body);
+      }
+
+      let res;
+      try {
+        res = await fetch(url, options);
+      } catch (netErr) {
+        throw new Error('网络连接不可用：' + (netErr.message || '请检查服务器'));
+      }
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        data = { error: '服务器未返回合法JSON数据' };
+      }
+
+      if (!res.ok) {
+        const err = new Error(data && data.error ? data.error : ('请求失败 (HTTP ' + res.status + ')'));
+        err.status = res.status;
+        err.data = data;
+        throw err;
+      }
+      return data;
+    }
+
+    // ==========================================
+    // 界面切换 & 提醒
+    // ==========================================
+    function showAlert(msg, isSuccess) {
+      const box = document.getElementById('alertBox');
+      const text = document.getElementById('alertMsg');
+      box.className = 'alert-bar ' + (isSuccess ? 'alert-success' : 'alert-danger');
+      text.innerText = msg;
+      box.style.display = 'flex';
+      if (isSuccess) {
+        setTimeout(() => {
+          if (box.innerText.includes(msg)) hideAlert();
+        }, 4000);
+      }
+    }
+
+    function hideAlert() {
+      document.getElementById('alertBox').style.display = 'none';
+    }
+
+    function showOnboarding() {
+      document.getElementById('viewOnboarding').style.display = 'block';
+      document.getElementById('viewDashboard').style.display = 'none';
+      document.getElementById('headerCourseSection').style.display = 'none';
+      document.getElementById('btnSwitchCourse').style.display = 'none';
+    }
+
+    function showDashboard() {
+      document.getElementById('viewOnboarding').style.display = 'none';
+      document.getElementById('viewDashboard').style.display = 'flex';
+      document.getElementById('headerCourseSection').style.display = 'flex';
+      document.getElementById('btnSwitchCourse').style.display = 'inline-flex';
+      updateHeaderCourseInfo();
+    }
+
+    function updateHeaderCourseInfo() {
+      document.getElementById('chipCourseTitle').innerText = currentSession.title || '课程控制台';
+      document.getElementById('chipCourseCode').innerText = currentSession.courseCode || '------';
+      document.getElementById('dashCourseTitle').innerText = currentSession.title || '课程控制台';
+      document.getElementById('dashCourseCode').innerText = currentSession.courseCode || '------';
+      document.getElementById('dashTeacherName').innerText = currentSession.teacherName || '授课教师';
+    }
+
+    // 复制课程码
+    function copyCourseCode() {
+      if (!currentSession.courseCode) return;
+      if (!navigator.clipboard) { showAlert('课程码为：' + currentSession.courseCode, true); return; }
+      navigator.clipboard.writeText(currentSession.courseCode)
+        .then(() => showAlert('课程码 [' + currentSession.courseCode + '] 已复制到剪贴板！', true))
+        .catch(() => showAlert('课程码为：' + currentSession.courseCode, true));
+    }
+
+    // ==========================================
+    // 业务动作：创建 / 恢复
+    // ==========================================
+    async function handleCreateCourse() {
+      const teacherName = document.getElementById('inputTeacherName').value.trim();
+      const title = document.getElementById('inputCourseTitle').value.trim();
+
+      if (!teacherName || !title) {
+        showAlert('请填写教师姓名和课程名称');
+        return;
+      }
+
+      try {
+        const res = await apiRequest('POST', '/api/v2/courses', { teacherName, title });
+        saveSession({
+          courseId: res.course.id,
+          teacherToken: res.teacherToken,
+          courseCode: res.courseCode,
+          title: res.course.title,
+          teacherName: res.course.teacherName
+        });
+        showAlert('课程创建成功！课程码为 ' + res.courseCode, true);
+        showDashboard();
+        pollAllData();
+        startPolling();
+      } catch (err) {
+        showAlert('创建课程失败: ' + err.message);
+      }
+    }
+
+    function openResumeModal() {
+      document.getElementById('modalResume').classList.add('open');
+    }
+    function closeResumeModal() {
+      document.getElementById('modalResume').classList.remove('open');
+    }
+
+    async function handleConfirmResume() {
+      const courseId = document.getElementById('resumeCourseId').value.trim();
+      const teacherToken = document.getElementById('resumeTeacherToken').value.trim();
+      if (!courseId || !teacherToken) {
+        showAlert('请填写完整的 Course ID 与 Teacher Token');
+        return;
+      }
+
+      currentSession.courseId = courseId;
+      currentSession.teacherToken = teacherToken;
+
+      try {
+        const res = await apiRequest('GET', '/api/v2/courses/' + courseId + '/home');
+        saveSession({
+          courseId: res.course.id,
+          teacherToken: teacherToken,
+          courseCode: res.course.courseCode,
+          title: res.course.title,
+          teacherName: res.course.teacherName
+        });
+        closeResumeModal();
+        showAlert('已成功连接到课程！', true);
+        showDashboard();
+        pollAllData();
+        startPolling();
+      } catch (err) {
+        showAlert('连接课程失败: ' + err.message);
+      }
+    }
+
+    // ==========================================
+    // 模式开关操作 (POST /api/v2/courses/:id/modes)
+    // ==========================================
+    async function toggleMode(modeType, enabled) {
+      if (!currentSession.courseId) return;
+      try {
+        const res = await apiRequest('POST', '/api/v2/courses/' + currentSession.courseId + '/modes', {
+          type: modeType,
+          enabled: enabled
+        });
+        applyModesState(res.modes);
+        showAlert((modeType === 'vocabulary' ? '背单词' : '算数') + '模式已' + (enabled ? '开启' : '关闭'), true);
+      } catch (err) {
+        showAlert('切换模式状态失败: ' + err.message);
+        // 回滚开关状态
+        pollHome();
+      }
+    }
+
+    function applyModesState(modes) {
+      if (!modes) return;
+      
+      const vSwitch = document.getElementById('switchVocabulary');
+      const aSwitch = document.getElementById('switchArithmetic');
+      const vCard = document.getElementById('cardModeVocabulary');
+      const aCard = document.getElementById('cardModeArithmetic');
+      const vLabel = document.getElementById('labelSwitchVocabulary');
+      const aLabel = document.getElementById('labelSwitchArithmetic');
+
+      vSwitch.checked = !!modes.vocabulary;
+      vLabel.innerText = modes.vocabulary ? '已开启' : '已关闭';
+      if (modes.vocabulary) {
+        vCard.classList.remove('disabled');
+      } else {
+        vCard.classList.add('disabled');
+      }
+
+      aSwitch.checked = !!modes.arithmetic;
+      aLabel.innerText = modes.arithmetic ? '已开启' : '已关闭';
+      if (modes.arithmetic) {
+        aCard.classList.remove('disabled');
+      } else {
+        aCard.classList.add('disabled');
+      }
+    }
+
+    // ==========================================
+    // 活动发布 (POST /api/v2/courses/:id/activities)
+    // ==========================================
+    function switchActivityTab(tab) {
+      const tabVocab = document.getElementById('tabBtnVocab');
+      const tabArith = document.getElementById('tabBtnArith');
+      const contentVocab = document.getElementById('tabContentVocab');
+      const contentArith = document.getElementById('tabContentArith');
+
+      if (tab === 'vocabulary') {
+        tabVocab.classList.add('active');
+        tabArith.classList.remove('active');
+        contentVocab.classList.add('active');
+        contentArith.classList.remove('active');
+      } else {
+        tabVocab.classList.remove('active');
+        tabArith.classList.add('active');
+        contentVocab.classList.remove('active');
+        contentArith.classList.add('active');
+      }
+    }
+
+    function updateVocabOptionStyle() {
+      const selected = document.querySelector('input[name="vocabCorrect"]:checked')?.value || '0';
+      for (let i = 0; i < 4; i++) {
+        const wrap = document.getElementById('vocabWrap' + i);
+        if (String(i) === selected) {
+          wrap.classList.add('correct');
+        } else {
+          wrap.classList.remove('correct');
+        }
+      }
+    }
+
+    function applyVocabPreset(word, options, correctIdx) {
+      document.getElementById('vocabWord').value = word;
+      for (let i = 0; i < 4; i++) {
+        document.getElementById('vocabOpt' + i).value = options[i] || '';
+      }
+      const radio = document.querySelector('input[name="vocabCorrect"][value="' + correctIdx + '"]');
+      if (radio) radio.checked = true;
+      updateVocabOptionStyle();
+    }
+
+    function applyArithPreset(expr, ans) {
+      document.getElementById('arithExpr').value = expr;
+      document.getElementById('arithAns').value = ans;
+    }
+
+    async function handlePublishVocabulary() {
+      const word = document.getElementById('vocabWord').value.trim();
+      const options = [
+        document.getElementById('vocabOpt0').value.trim(),
+        document.getElementById('vocabOpt1').value.trim(),
+        document.getElementById('vocabOpt2').value.trim(),
+        document.getElementById('vocabOpt3').value.trim()
+      ];
+      const correctIndex = Number(document.querySelector('input[name="vocabCorrect"]:checked')?.value || 0);
+
+      if (!word) {
+        showAlert('请填写背单词的目标英文单词');
+        return;
+      }
+      if (options.some(opt => !opt)) {
+        showAlert('请完整填写 A、B、C、D 四个中文释义选项');
+        return;
+      }
+
+      const payload = {
+        modeType: 'vocabulary',
+        question: {
+          word: word,
+          options: options,
+          correctIndex: correctIndex
+        }
+      };
+
+      try {
+        if (!document.getElementById('switchVocabulary').checked) {
+          const modeRes = await apiRequest('POST', '/api/v2/courses/' + currentSession.courseId + '/modes', { type: 'vocabulary', enabled: true });
+          applyModesState(modeRes.modes);
+        }
+        const res = await apiRequest('POST', '/api/v2/courses/' + currentSession.courseId + '/activities', payload);
+        showAlert('词汇活动发布成功！单词：' + word, true);
+        renderCurrentActivity(res.activity);
+      } catch (err) {
+        showAlert('发布词汇活动失败: ' + err.message + (err.status === 409 ? ' (请先在上方开启【背单词】模式)' : ''));
+      }
+    }
+
+    async function handlePublishArithmetic() {
+      const expression = document.getElementById('arithExpr').value.trim();
+      const answerVal = document.getElementById('arithAns').value.trim();
+
+      if (!expression && !answerVal) {
+        showAlert('请至少输入算数表达式或指定正确答案');
+        return;
+      }
+
+      const payload = {
+        modeType: 'arithmetic',
+        expression: expression
+      };
+      if (answerVal !== '') {
+        const num = Number(answerVal);
+        payload.answer = isNaN(num) ? answerVal : num;
+      }
+
+      try {
+        if (!document.getElementById('switchArithmetic').checked) {
+          const modeRes = await apiRequest('POST', '/api/v2/courses/' + currentSession.courseId + '/modes', { type: 'arithmetic', enabled: true });
+          applyModesState(modeRes.modes);
+        }
+        const res = await apiRequest('POST', '/api/v2/courses/' + currentSession.courseId + '/activities', payload);
+        showAlert('算数活动发布成功！表达式：' + (expression || payload.answer), true);
+        renderCurrentActivity(res.activity);
+      } catch (err) {
+        showAlert('发布算数活动失败: ' + err.message + (err.status === 409 ? ' (请先在上方开启【快速算数】模式)' : ''));
+      }
+    }
+
+    // ==========================================
+    // 渲染当前活动
+    // ==========================================
+    function renderCurrentActivity(activity) {
+      const container = document.getElementById('currActivityDisplay');
+      if (!activity) {
+        container.className = 'current-activity-card empty';
+        container.innerHTML = `
+          <div class="curr-badge badge-class">待发布</div>
+          <div class="curr-question-text" style="color: var(--text-muted); font-size: 15px; font-weight: normal;">
+            当前暂无进行中的活动，请在左侧发起词汇或算数活动。
+          </div>
+        `;
+        return;
+      }
+
+      container.className = 'current-activity-card';
+      const q = activity.question || {};
+      const timeStr = activity.createdAt ? new Date(activity.createdAt).toLocaleTimeString() : '';
+
+      if (activity.modeType === 'vocabulary') {
+        const correct = q.correctIndex ?? q.correct ?? q.answer ?? 0;
+        const optionsHtml = (q.options || []).map((opt, idx) => {
+          const isCorrect = idx === Number(correct);
+          const letter = String.fromCharCode(65 + idx);
+          return `
+            <div class="curr-option-pill ${isCorrect ? 'is-correct' : ''}">
+              <strong style="color: ${isCorrect ? 'var(--success)' : 'var(--text-muted)'};">${letter}.</strong>
+              <span>${escapeHtml(opt)}</span>
+              ${isCorrect ? '<span style="margin-left:auto; font-size:11px;">✓ 正解</span>' : ''}
+            </div>
+          `;
+        }).join('');
+
+        container.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="curr-badge badge-vocab">📖 词汇活动进行中</span>
+            <span style="font-size: 11px; color: var(--text-dim);">发布于 ${timeStr}</span>
+          </div>
+          <div class="curr-question-text">${escapeHtml(q.word || '未知单词')}</div>
+          <div class="curr-options-list">
+            ${optionsHtml}
+          </div>
+        `;
+      } else if (activity.modeType === 'arithmetic') {
+        container.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="curr-badge badge-arith">🧮 算数速算进行中</span>
+            <span style="font-size: 11px; color: var(--text-dim);">发布于 ${timeStr}</span>
+          </div>
+          <div class="curr-question-text">${escapeHtml(q.expression || '数值计算')}</div>
+          <div style="background: rgba(6, 182, 212, 0.08); border: 1px dashed var(--accent); padding: 10px 14px; border-radius: 6px; font-size: 13px;">
+            <span style="color: var(--text-muted);">标准计算答案：</span>
+            <strong style="color: var(--accent); font-family: var(--font-mono); font-size: 16px;">${q.answer !== undefined ? escapeHtml(q.answer) : '(服务端核验)'}</strong>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="curr-badge badge-class">常规活动</div>
+          <div class="curr-question-text">${escapeHtml(q.text || '课堂提问')}</div>
+        `;
+      }
+    }
+
+    // ==========================================
+    // 渲染成员、绑定与正确率
+    // ==========================================
+    function renderMembersAndStats(members, devices, stats) {
+      const studentCountEl = document.getElementById('dashStudentCount');
+      const deviceCountEl = document.getElementById('dashDeviceCount');
+      const memberSummaryEl = document.getElementById('memberSummary');
+      const deviceSummaryEl = document.getElementById('deviceSummary');
+      const memberTbody = document.getElementById('memberTableBody');
+      const deviceTbody = document.getElementById('deviceTableBody');
+      const bindSelect = document.getElementById('bindStudentSelect');
+
+      const allMembers = members || [];
+      const students = allMembers.filter(m => m.role === 'student');
+      studentCountEl.innerText = students.length;
+      memberSummaryEl.innerText = students.length + ' 名学生';
+
+      // 建立 studentId -> bound deviceIds 倒查表
+      const studentDevicesMap = {};
+      const devEntries = Object.entries(devices || {});
+      deviceCountEl.innerText = devEntries.length;
+      deviceSummaryEl.innerText = devEntries.length + ' 台设备';
+
+      devEntries.forEach(([devId, stuId]) => {
+        if (!studentDevicesMap[stuId]) studentDevicesMap[stuId] = [];
+        studentDevicesMap[stuId].push(devId);
+      });
+
+      // 更新绑定下拉框备选项
+      const currentSelected = bindSelect.value;
+      let selectHtml = '<option value="">-- 选择学生 --</option>';
+      students.forEach(s => {
+        selectHtml += `<option value="${escapeHtml(s.id)}" ${s.id === currentSelected ? 'selected' : ''}>${escapeHtml(s.name)}</option>`;
+      });
+      bindSelect.innerHTML = selectHtml;
+
+      // 渲染成员表格（含背单词/算数每人正确率）
+      if (students.length === 0) {
+        memberTbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-dim); padding: 20px;">暂无学生加入。可将课程码 <strong>' + (currentSession.courseCode || '') + '</strong> 分享给学生端</td></tr>';
+      } else {
+        memberTbody.innerHTML = students.map(stu => {
+          const boundDevs = studentDevicesMap[stu.id] || [];
+          const devHtml = boundDevs.length 
+            ? boundDevs.map(d => `<span class="tag-device" title="${escapeHtml(d)}">${escapeHtml(d)}</span>`).join(' ')
+            : '<span style="color: var(--text-dim); font-size: 11px;">未绑定硬件</span>';
+
+          const vStat = (stu.stats && stu.stats.vocabulary) || { attempted: 0, correct: 0, accuracy: 0, practice: { attempted: 0, correct: 0, accuracy: 0 } };
+          const aStat = (stu.stats && stu.stats.arithmetic) || { attempted: 0, correct: 0, accuracy: 0, practice: { attempted: 0, correct: 0, accuracy: 0 } };
+          const vPractice = vStat.practice || { attempted: 0, correct: 0, accuracy: 0 };
+          const aPractice = aStat.practice || { attempted: 0, correct: 0, accuracy: 0 };
+
+          const vPercent = Math.round((vStat.accuracy || 0) * 100);
+          const aPercent = Math.round((aStat.accuracy || 0) * 100);
+
+          return `
+            <tr>
+              <td>
+                <div style="font-weight: 600;">${escapeHtml(stu.name)}</div>
+                <div style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">${stu.id.slice(0, 8)}...</div>
+              </td>
+              <td>${devHtml}</td>
+              <td>
+                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                  <span>${vStat.correct}/${vStat.attempted} 正确 · 自主 ${vPractice.correct}/${vPractice.attempted}</span>
+                  <strong style="color: ${vStat.attempted ? (vPercent >= 60 ? 'var(--success)' : 'var(--warning)') : 'var(--text-dim)'};">${vPercent}%</strong>
+                </div>
+                <div class="rate-bar-container">
+                  <div class="rate-bar-fill" style="width: ${vPercent}%; background: ${vPercent >= 60 ? 'var(--success)' : 'var(--warning)'};"></div>
+                </div>
+              </td>
+              <td>
+                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                  <span>${aStat.correct}/${aStat.attempted} 正确 · 自主 ${aPractice.correct}/${aPractice.attempted}</span>
+                  <strong style="color: ${aStat.attempted ? (aPercent >= 60 ? 'var(--accent)' : 'var(--warning)') : 'var(--text-dim)'};">${aPercent}%</strong>
+                </div>
+                <div class="rate-bar-container">
+                  <div class="rate-bar-fill" style="width: ${aPercent}%; background: ${aPercent >= 60 ? 'var(--accent)' : 'var(--warning)'};"></div>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // 渲染设备列表
+      if (devEntries.length === 0) {
+        deviceTbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-dim); padding: 20px;">暂无绑定的硬件设备。输入设备 ID 并选中学生可立即绑定。</td></tr>';
+      } else {
+        deviceTbody.innerHTML = devEntries.map(([devId, stuId]) => {
+          const student = students.find(s => s.id === stuId);
+          const studentName = student ? student.name : '未知学生 (' + stuId.slice(0, 8) + ')';
+          return `
+            <tr>
+              <td><span class="tag-device">${escapeHtml(devId)}</span></td>
+              <td><strong>${escapeHtml(studentName)}</strong></td>
+              <td>
+                <button class="btn btn-secondary btn-sm" onclick="rebindDevice('${escapeHtml(devId)}', '${escapeHtml(stuId)}')">
+                  换绑
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    function rebindDevice(deviceId, currentStudentId) {
+      document.getElementById('bindDeviceId').value = deviceId;
+      document.getElementById('bindStudentSelect').value = currentStudentId;
+      document.getElementById('bindDeviceId').focus();
+    }
+
+    async function handleBindDevice() {
+      const deviceId = document.getElementById('bindDeviceId').value.trim();
+      const studentId = document.getElementById('bindStudentSelect').value;
+
+      if (!deviceId || !studentId) {
+        showAlert('请填写设备 ID 并选择目标学生');
+        return;
+      }
+
+      try {
+        await apiRequest('PUT', '/api/v2/courses/' + currentSession.courseId + '/devices/' + encodeURIComponent(deviceId) + '/bind', {
+          studentId: studentId
+        });
+        showAlert('设备 [' + deviceId + '] 已成功绑定至学生！', true);
+        document.getElementById('bindDeviceId').value = '';
+        pollMembersAndDevices();
+      } catch (err) {
+        showAlert('绑定设备失败: ' + err.message);
+      }
+    }
+
+    // ==========================================
+    // 轮询体系 (HTTP 周期性拉取，无 WS 依赖)
+    // ==========================================
+    async function pollHome() {
+      if (!currentSession.courseId) return;
+      const data = await apiRequest('GET', '/api/v2/courses/' + currentSession.courseId + '/home');
+      if (data.course) {
+        currentSession.title = data.course.title;
+        currentSession.courseCode = data.course.courseCode;
+        currentSession.teacherName = data.course.teacherName;
+        updateHeaderCourseInfo();
+        applyModesState(data.course.modes);
+      }
+    }
+
+    async function pollCurrentActivity() {
+      if (!currentSession.courseId) return;
+      const data = await apiRequest('GET', '/api/v2/courses/' + currentSession.courseId + '/current');
+      renderCurrentActivity(data.activity);
+    }
+
+    async function pollMembersAndDevices() {
+      if (!currentSession.courseId) return;
+      const [membersData, devicesData, statsData] = await Promise.all([
+        apiRequest('GET', '/api/v2/courses/' + currentSession.courseId + '/members'),
+        apiRequest('GET', '/api/v2/courses/' + currentSession.courseId + '/devices'),
+        apiRequest('GET', '/api/v2/courses/' + currentSession.courseId + '/stats')
+      ]);
+      renderMembersAndStats(membersData.members, devicesData.devices, statsData.stats);
+    }
+
+    async function savePhotoAnnotation(photoId) {
+      const input = document.getElementById('annotation-' + photoId);
+      const content = input.value.trim();
+      if (!content) return showAlert('请先输入教师批注');
+      try {
+        await apiRequest('POST', '/api/v2/courses/' + currentSession.courseId + '/annotations', { targetType: 'photo', targetId: photoId, content });
+        showAlert('教师私有批注已保存', true);
+        await Promise.all([pollPhotoAnnotations(), pollLearningInsights()]);
+      } catch (err) { showAlert('保存批注失败: ' + err.message); }
+    }
+
+    async function pollPhotoAnnotations() {
+      if (!currentSession.courseId) return;
+      const [photosData, annotationsData] = await Promise.all([
+        apiRequest('GET', '/api/v2/courses/' + currentSession.courseId + '/classroom/photos'),
+        apiRequest('GET', '/api/v2/courses/' + currentSession.courseId + '/annotations')
+      ]);
+      const photos = photosData.photos || []; const annotations = annotationsData.annotations || [];
+      document.getElementById('photoSummary').textContent = photos.length + ' 张图片';
+      const container = document.getElementById('photoAnnotationList');
+      if (!photos.length) { container.innerHTML = '<div style="color:var(--text-dim);">暂无课堂图片</div>'; return; }
+      container.innerHTML = photos.map(photo => {
+        const note = annotations.find(item => item.targetType === 'photo' && item.targetId === photo.id);
+        return `<article style="display:grid;grid-template-columns:minmax(120px,220px) minmax(180px,1fr);gap:12px;padding:12px;border:1px solid var(--border);border-radius:8px;"><button type="button" class="btn btn-secondary" style="padding:0;min-height:120px;" onclick="openPhotoPreview('${escapeHtml(photo.id)}')"><img id="photo-preview-${photo.id}" alt="学生作业照片" style="display:none;width:100%;max-height:220px;object-fit:contain;background:#080d16;border-radius:6px;"><span id="photo-loading-${photo.id}">加载图片...</span></button><div style="display:flex;flex-direction:column;gap:8px;"><strong>${escapeHtml(photo.studentName)} · ${new Date(photo.receivedAt).toLocaleString()}</strong><textarea id="annotation-${photo.id}" maxlength="500" placeholder="仅教师可见的学习观察或指导建议" style="min-height:96px;resize:vertical;">${escapeHtml(note?.content || '')}</textarea><button class="btn btn-secondary btn-sm" style="align-self:flex-start;" onclick="savePhotoAnnotation('${escapeHtml(photo.id)}')">保存教师批注</button><small style="color:var(--text-dim);">批注仅存本地服务课程数据，不向学生端返回。</small></div></article>`;
+      }).join('');
+      await Promise.all(photos.map(photo => loadPhotoPreview(photo)));
+    }
+
+    async function loadPhotoPreview(photo) {
+      const image = document.getElementById('photo-preview-' + photo.id);
+      const loading = document.getElementById('photo-loading-' + photo.id);
+      if (!image || !loading) return;
+      try {
+        const headers = currentSession.teacherToken ? { Authorization: 'Bearer ' + currentSession.teacherToken } : {};
+        const response = await fetch(photo.url, { headers });
+        if (!response.ok) throw new Error('图片加载失败');
+        const previous = photoPreviewUrls.get(photo.id);
+        if (previous) URL.revokeObjectURL(previous);
+        const url = URL.createObjectURL(await response.blob()); photoPreviewUrls.set(photo.id, url);
+        image.src = url; image.style.display = 'block'; loading.style.display = 'none';
+      } catch (_) { loading.textContent = '图片不可用'; }
+    }
+
+    function openPhotoPreview(photoId) {
+      const url = photoPreviewUrls.get(photoId);
+      if (url) window.open(url, '_blank', 'noopener');
+    }
+
+    async function pollLearningInsights() {
+      if (!currentSession.courseId) return;
+      const data = await apiRequest('GET', '/api/v2/courses/' + currentSession.courseId + '/learning-insights');
+      const students = data.students || []; const container = document.getElementById('learningInsightsList');
+      if (!students.length) { container.innerHTML = '<div style="color:var(--text-dim);">暂无学生数据</div>'; return; }
+      container.innerHTML = `<div style="font-size:11px;color:var(--text-dim);">分析时间 ${new Date(data.generatedAt).toLocaleTimeString()} · ${escapeHtml(data.method)} · 建议需结合教师观察判断</div>` + students.map(student => `<article style="padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-card);"><div style="display:flex;justify-content:space-between;gap:8px;"><strong>${escapeHtml(student.studentName)}</strong><span class="badge-v2">${escapeHtml(student.level)}</span></div><div style="font-size:12px;color:var(--text-muted);margin-top:6px;">作答 ${student.attempted} 次 · 正确率 ${student.accuracy === null ? '样本不足' : Math.round(student.accuracy * 100) + '%'} · 教师图片批注 ${student.annotationCount} 条</div><div style="font-size:12px;margin-top:6px;"><strong>依据：</strong>${student.evidence.map(escapeHtml).join('；')}</div><ul style="font-size:12px;color:var(--text-muted);padding-left:20px;margin:6px 0 0;">${student.recommendations.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul></article>`).join('');
+    }
+
+
+    async function pollAllData() {
+      if (isPolling || !currentSession.courseId) return;
+      isPolling = true;
+      const dot = document.getElementById('pollDot');
+      const statusText = document.getElementById('pollStatusText');
+      dot.classList.add('pulse');
+
+      try {
+        await Promise.all([pollHome(), pollCurrentActivity(), pollMembersAndDevices(), pollPhotoAnnotations(), pollLearningInsights()]);
+        dot.className = 'poll-dot';
+        statusText.innerText = '在线同步中 (' + new Date().toLocaleTimeString() + ')';
+      } catch (err) {
+        dot.className = 'poll-dot error';
+        statusText.innerText = '同步异常: ' + (err.message || '网络中断');
+        console.warn('轮询拉取异常:', err);
+      } finally {
+        isPolling = false;
+      }
+    }
+
+    function startPolling() {
+      stopPolling();
+      // 3秒轮询一次，保证课堂状态与作答反应敏捷
+      pollTimer = setInterval(pollAllData, 3000);
+    }
+
+    function stopPolling() {
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    }
+
+    // ==========================================
+    // 事件挂载
+    // ==========================================
+    function setupEventListeners() {
+      // 引导创建课程
+      document.getElementById('btnCreateCourse').addEventListener('click', handleCreateCourse);
+      document.getElementById('btnShowResumeModal').addEventListener('click', openResumeModal);
+      document.getElementById('btnConfirmResume').addEventListener('click', handleConfirmResume);
+
+      // 顶部操作
+      document.getElementById('chipCourseCode').addEventListener('click', copyCourseCode);
+      document.getElementById('heroCodeBox').addEventListener('click', copyCourseCode);
+      document.getElementById('btnManualRefresh').addEventListener('click', () => {
+        showAlert('正在手动拉取最新数据...', true);
+        pollAllData();
+      });
+      document.getElementById('btnSwitchCourse').addEventListener('click', () => {
+        if (confirm('确定要切换课程吗？当前课程信息已保存在本地。')) {
+          clearSession();
+        }
+      });
+
+      // 模式开关
+      document.getElementById('switchVocabulary').addEventListener('change', (e) => {
+        toggleMode('vocabulary', e.target.checked);
+      });
+      document.getElementById('switchArithmetic').addEventListener('change', (e) => {
+        toggleMode('arithmetic', e.target.checked);
+      });
+
+      // 快速进入选项卡
+      document.getElementById('btnQuickGoVocab').addEventListener('click', () => {
+        switchActivityTab('vocabulary');
+        document.getElementById('vocabWord').focus();
+      });
+      document.getElementById('btnQuickGoArith').addEventListener('click', () => {
+        switchActivityTab('arithmetic');
+        document.getElementById('arithExpr').focus();
+      });
+
+      // 活动发布
+      document.getElementById('btnPublishVocab').addEventListener('click', handlePublishVocabulary);
+      document.getElementById('btnPublishArith').addEventListener('click', handlePublishArithmetic);
+
+      // 设备绑定
+      document.getElementById('btnSubmitBind').addEventListener('click', handleBindDevice);
+    }
+
+    // HTML 转义防注入
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>

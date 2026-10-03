@@ -1,0 +1,1917 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>智慧云课堂 · 学生答题端</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --bg-card: rgba(18, 26, 43, 0.88);
+      --bg-card-hover: rgba(28, 39, 65, 0.95);
+      --bg-input: #0e1526;
+      --border: #22324e;
+      --border-focus: #38bdf8;
+      --primary: #2563eb;
+      --primary-glow: rgba(37, 99, 235, 0.35);
+      --primary-hover: #1d4ed8;
+      --accent: #38bdf8;
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.3);
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.3);
+      --warning: #f59e0b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(56, 189, 248, 0.12) 0%, transparent 45%);
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* 顶部导航条 */
+    header {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      display: inline-block;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .status-dot.online {
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+    }
+
+    .status-dot.polling {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 1.2s infinite ease-in-out;
+    }
+
+    .status-dot.offline {
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    .btn-text {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+    .btn-text:hover {
+      color: var(--text);
+    }
+
+    /* 消息浮动提示条 (Toast / Notification) */
+    #noticeBar {
+      position: fixed;
+      top: 64px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-120%);
+      z-index: 100;
+      min-width: 280px;
+      max-width: 90vw;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: var(--shadow-lg);
+    }
+
+    #noticeBar.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #noticeBar.error {
+      background: #7f1d1d;
+      color: #fecaca;
+      border: 1px solid #b91c1c;
+    }
+
+    #noticeBar.warning {
+      background: #78350f;
+      color: #fef3c7;
+      border: 1px solid #d97706;
+    }
+
+    #noticeBar.success {
+      background: #064e3b;
+      color: #a7f3d0;
+      border: 1px solid #059669;
+    }
+
+    #noticeBar.info {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+    }
+
+    /* 离线常驻提示条 */
+    #offlineWarningBanner {
+      display: none;
+      background: rgba(220, 38, 38, 0.9);
+      color: #fff;
+      text-align: center;
+      font-size: 13px;
+      padding: 6px 12px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    #offlineWarningBanner.visible {
+      display: block;
+    }
+
+    /* 容器主体 */
+    main {
+      flex: 1;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .view-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      padding: 24px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* 步骤 1: 登录加入 */
+    .join-container {
+      max-width: 440px;
+      margin: 40px auto 0;
+      width: 100%;
+    }
+
+    .join-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .join-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .join-header p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+    .input-code {
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .btn-submit-join {
+      width: 100%;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--primary-glow);
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-submit-join:hover:not(:disabled) {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit-join:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* 步骤 2: 课程首页与同级三模式 */
+    .course-overview {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .course-title-group h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .course-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .course-code-badge {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* 三模式卡片并列网格 (同级显示) */
+    .modes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 720px) {
+      .modes-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mode-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .mode-card.enabled {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: linear-gradient(180deg, rgba(18, 30, 52, 0.9) 0%, rgba(14, 21, 38, 0.9) 100%);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    }
+
+    .mode-card.disabled {
+      opacity: 0.55;
+      background: rgba(15, 23, 42, 0.4);
+      border-color: rgba(255, 255, 255, 0.05);
+      filter: grayscale(0.5);
+    }
+
+    .mode-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .mode-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    .mode-classroom .mode-icon { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .mode-vocabulary .mode-icon { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .mode-arithmetic .mode-icon { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+    .mode-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .mode-badge.enabled-badge {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .mode-badge.disabled-badge {
+      background: rgba(100, 116, 139, 0.2);
+      color: #94a3b8;
+      border: 1px solid rgba(100, 116, 139, 0.3);
+    }
+
+    .mode-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .mode-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      flex: 1;
+      margin-bottom: 14px;
+    }
+
+    .mode-action-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .mode-card.enabled .mode-action-btn {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .mode-card.enabled .mode-action-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .mode-card.disabled .mode-action-btn {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-dim);
+      cursor: not-allowed;
+    }
+
+    /* 当前进行中的活动提示条 */
+    .active-activity-banner {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(56, 189, 248, 0.15) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .active-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pulse-ring {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      position: relative;
+    }
+    .pulse-ring::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      animation: ripple 1.5s infinite;
+    }
+    @keyframes ripple {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    .active-text h4 {
+      font-size: 15px;
+      color: #fff;
+      font-weight: 600;
+    }
+    .active-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .btn-enter-activity {
+      background: var(--accent);
+      color: #0b1120;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .btn-enter-activity:hover {
+      background: #7dd3fc;
+      transform: translateY(-1px);
+    }
+
+    /* 答题工作台容器 (Activity Workspace) */
+    .activity-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .activity-top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn-back {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .btn-back:hover {
+      background: var(--border);
+    }
+
+    .activity-type-badge {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--accent);
+    }
+
+    /* 空状态 / 等待中 */
+    .waiting-box {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .waiting-icon {
+      font-size: 40px;
+      margin-bottom: 16px;
+      display: inline-block;
+      animation: rotateSlow 8s linear infinite;
+    }
+    @keyframes rotateSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .waiting-box h3 {
+      font-size: 18px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .waiting-box p {
+      font-size: 14px;
+    }
+
+    /* 模式 1: 背单词 (Vocabulary) 布局 */
+    .vocab-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .vocab-card {
+      background: linear-gradient(135deg, rgba(20, 30, 55, 0.95) 0%, rgba(13, 21, 38, 0.95) 100%);
+      border: 2px solid rgba(56, 189, 248, 0.3);
+      border-radius: 16px;
+      padding: 36px 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .vocab-word {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      word-break: break-word;
+    }
+
+    .vocab-prompt {
+      font-size: 14px;
+      color: var(--accent);
+      margin-top: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* 四个中文释义选项网格 */
+    .vocab-options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .vocab-options-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .vocab-word {
+        font-size: 32px;
+      }
+    }
+
+    .vocab-option-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      outline: none;
+    }
+
+    .vocab-option-btn:hover:not(:disabled) {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .vocab-option-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .vocab-option-btn:disabled {
+      cursor: default;
+    }
+
+    .opt-letter {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .opt-label {
+      flex: 1;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+
+    /* 选项状态类 */
+    .vocab-option-btn.selected {
+      border-color: var(--primary);
+      background: rgba(37, 99, 235, 0.25);
+    }
+    .vocab-option-btn.selected .opt-letter {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .vocab-option-btn.status-correct {
+      border-color: var(--success) !important;
+      background: rgba(16, 185, 129, 0.2) !important;
+    }
+    .vocab-option-btn.status-correct .opt-letter {
+      background: var(--success) !important;
+      color: #fff !important;
+    }
+
+    .vocab-option-btn.status-wrong {
+      border-color: var(--danger) !important;
+      background: rgba(239, 68, 68, 0.2) !important;
+    }
+    .vocab-option-btn.status-wrong .opt-letter {
+      background: var(--danger) !important;
+      color: #fff !important;
+    }
+
+    /* 模式 2: 算数题目 (Arithmetic) 布局：上半题目、下半大号输入答案/提交/结果 */
+    .arithmetic-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* 上半题目区域 */
+    .arithmetic-question-panel {
+      background: linear-gradient(135deg, rgba(24, 33, 56, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 2px solid rgba(56, 189, 248, 0.3);
+      border-radius: 16px;
+      padding: 36px 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .arithmetic-expression {
+      font-size: 46px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #fff;
+      font-family: var(--font-mono);
+      text-shadow: 0 2px 12px rgba(56, 189, 248, 0.35);
+      word-break: break-all;
+    }
+
+    @media (max-width: 600px) {
+      .arithmetic-expression {
+        font-size: 34px;
+      }
+    }
+
+    .arithmetic-subtext {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* 下半答案大号输入与提交操作区域 */
+    .arithmetic-answer-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .large-input-wrapper {
+      width: 100%;
+      max-width: 380px;
+      position: relative;
+    }
+
+    .large-answer-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-size: 32px;
+      font-weight: 800;
+      text-align: center;
+      color: #fff;
+      font-family: var(--font-mono);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .large-answer-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.25);
+    }
+
+    .large-answer-input::placeholder {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text-dim);
+    }
+
+    .btn-submit-answer {
+      width: 100%;
+      max-width: 380px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 16px var(--primary-glow);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit-answer:hover:not(:disabled) {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      transform: translateY(-2px);
+    }
+
+    .btn-submit-answer:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* 结果反馈卡片 (通用) */
+    .result-feedback-card {
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 18px 20px;
+      border-radius: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-feedback-card.correct {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #a7f3d0;
+    }
+
+    .result-feedback-card.wrong {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fecaca;
+    }
+
+    .result-feedback-card.duplicate {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fde68a;
+    }
+
+    .feedback-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .feedback-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .feedback-detail {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    /* 课堂常规互动模式 (Classroom / Legacy) */
+    .classroom-info-box {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .classroom-info-box h3 {
+      font-size: 20px;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .classroom-info-box p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* 实用类 */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部导航 -->
+  <header>
+    <div class="brand">
+      <span>云课堂互动</span>
+      <span class="brand-badge">STUDENT V2</span>
+    </div>
+    <div class="nav-actions">
+      <div id="connectionStatus" class="user-pill">
+        <span id="statusDot" class="status-dot online"></span>
+        <span id="statusText">就绪</span>
+      </div>
+      <div id="userDisplay" class="user-pill hidden">
+        <span id="studentNameLabel">学生</span>
+      </div>
+      <button id="btnExitCourse" class="btn-text hidden" onclick="handleExitCourse()">退出课程</button>
+    </div>
+  </header>
+
+  <!-- 离线提示横幅 -->
+  <div id="offlineWarningBanner">网络连接中断，系统正在尝试重新连接中...</div>
+
+  <!-- 提示浮层通知条 -->
+  <div id="noticeBar"></div>
+
+  <!-- 主体工作区 -->
+  <main>
+
+    <!-- 视图 1: 输入课程码和姓名加入课程 -->
+    <section id="viewJoin" class="join-container">
+      <div class="view-card">
+        <div class="join-header">
+          <h2>加入班级课堂</h2>
+          <p>请输入教师公布的 6 位课程码与您的姓名</p>
+        </div>
+        <form id="joinForm" onsubmit="handleJoinSubmit(event)">
+          <div class="form-group">
+            <label for="inputCourseCode">课程码 (6位字母数字)</label>
+            <input 
+              id="inputCourseCode" 
+              type="text" 
+              class="input-field input-code" 
+              maxlength="6" 
+              placeholder="如 A1B2C3" 
+              autocomplete="off" 
+              autocapitalize="characters"
+              required
+            >
+          </div>
+          <div class="form-group">
+            <label for="inputStudentName">您的姓名</label>
+            <input 
+              id="inputStudentName" 
+              type="text" 
+              class="input-field" 
+              placeholder="请输入真实姓名" 
+              maxlength="50" 
+              autocomplete="name" 
+              required
+            >
+          </div>
+          <button id="btnJoinSubmit" type="submit" class="btn-submit-join">进入课堂</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 视图 2: 课程首页 (同级显示三模式，明确标示启用/禁用) -->
+    <section id="viewHome" class="hidden">
+      <!-- 课程信息栏 -->
+      <div class="course-overview">
+        <div class="course-title-group">
+          <h2 id="homeCourseTitle">课程名称</h2>
+          <div class="course-meta">
+            授课教师: <span id="homeTeacherName">教师</span> &nbsp;|&nbsp; 
+            当前学员: <span id="homeStudentName">本人</span>
+          </div>
+        </div>
+        <div class="course-code-badge" title="当前课程邀请码">
+          <span id="homeCourseCode">------</span>
+        </div>
+      </div>
+
+      <!-- 如果当前有进行中的活动，显示快速进入条 -->
+      <div id="activeActivityBanner" class="active-activity-banner hidden">
+        <div class="active-info">
+          <div class="pulse-ring"></div>
+          <div class="active-text">
+            <h4 id="activeActivityTitle">当前有正在进行的活动！</h4>
+            <p id="activeActivitySubtitle">老师已发布题目，点击立即参与作答</p>
+          </div>
+        </div>
+        <button class="btn-enter-activity" onclick="enterCurrentActivity()">立即参与答题</button>
+      </div>
+
+      <!-- 同级三模式卡片展示 -->
+      <div class="section-title">课程互动模式</div>
+      <div class="modes-grid">
+        
+        <!-- 模式 1: 课堂互动 (classroom) -->
+        <div id="modeCardClassroom" class="mode-card">
+          <div class="mode-card-header">
+            <div class="mode-icon">课</div>
+            <span id="badgeClassroom" class="mode-badge">检测中</span>
+          </div>
+          <div class="mode-title">课堂常规互动</div>
+          <div class="mode-desc">支持实时答题抢答、设备互动与投屏教学配合。</div>
+          <button id="btnEnterClassroom" class="mode-action-btn" onclick="openModeWorkspace('classroom')">
+            进入互动
+          </button>
+        </div>
+
+        <!-- 模式 2: 背单词 (vocabulary) -->
+        <div id="modeCardVocab" class="mode-card">
+          <div class="mode-card-header">
+            <div class="mode-icon">词</div>
+            <span id="badgeVocab" class="mode-badge">检测中</span>
+          </div>
+          <div class="mode-title">背单词训练</div>
+          <div class="mode-desc">展示英文单词并配合四个中文释义选项，快速强化记忆。</div>
+          <button id="btnEnterVocab" class="mode-action-btn" onclick="openModeWorkspace('vocabulary')">
+            进入训练
+          </button>
+        </div>
+
+        <!-- 模式 3: 算数练习 (arithmetic) -->
+        <div id="modeCardArithmetic" class="mode-card">
+          <div class="mode-card-header">
+            <div class="mode-icon">数</div>
+            <span id="badgeArithmetic" class="mode-badge">检测中</span>
+          </div>
+          <div class="mode-title">口算速算练习</div>
+          <div class="mode-desc">大号题目展示与专属高精度答题板，锻炼计算反应力。</div>
+          <button id="btnEnterArithmetic" class="mode-action-btn" onclick="openModeWorkspace('arithmetic')">
+            进入练习
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 视图 3: 活动答题工作台 (Activity Workspace) -->
+    <section id="viewActivity" class="hidden">
+      <div class="view-card activity-container">
+        
+        <!-- 顶部操作条 -->
+        <div class="activity-top-nav">
+          <button class="btn-back" onclick="backToHome()">← 返回课程首页</button>
+          <div id="activityBadge" class="activity-type-badge">活动进行中</div>
+        </div>
+
+        <!-- 等待教师发布题目的空状态 -->
+        <div id="waitingState" class="waiting-box">
+          <div class="waiting-icon">⏳</div>
+          <h3>等待老师发布活动</h3>
+          <p>老师尚未在此模式下发布题目，页面正在实时监测中，请保持关注...</p>
+        </div>
+
+        <!-- 背单词模式工作区 -->
+        <div id="vocabStage" class="vocab-stage hidden">
+          <div class="vocab-card">
+            <div id="vocabWord" class="vocab-word">Word</div>
+            <div class="vocab-prompt">请从下方选择正确的中文释义</div>
+          </div>
+
+          <div id="vocabOptions" class="vocab-options-grid">
+            <!-- 动态生成 4 个中文释义选项 -->
+          </div>
+
+          <!-- 作答结果反馈 -->
+          <div id="vocabFeedback" class="result-feedback-card hidden"></div>
+        </div>
+
+        <!-- 算数速算模式工作区 (上半题目，下半大号输入答案/提交/结果) -->
+        <div id="arithmeticStage" class="arithmetic-stage hidden">
+          <!-- 上半题目展示 -->
+          <div class="arithmetic-question-panel">
+            <div id="arithmeticExpression" class="arithmetic-expression">12 + 34 = ?</div>
+            <div class="arithmetic-subtext">请计算结果并在下方输入准确数值</div>
+          </div>
+
+          <!-- 下半大号输入答案 / 提交 / 结果反馈 -->
+          <div class="arithmetic-answer-panel">
+            <form id="arithmeticForm" class="large-input-wrapper" onsubmit="handleArithmeticSubmit(event)">
+              <input 
+                id="arithmeticAnswerInput" 
+                type="number" 
+                step="any" 
+                class="large-answer-input" 
+                placeholder="在此输入答案" 
+                autocomplete="off" 
+                required
+              >
+              <div style="height: 14px;"></div>
+              <button id="btnSubmitArithmetic" type="submit" class="btn-submit-answer">
+                <span>提交答案</span>
+              </button>
+            </form>
+
+            <!-- 结果反馈区域 -->
+            <div id="arithmeticFeedback" class="result-feedback-card hidden"></div>
+          </div>
+        </div>
+
+        <!-- 课堂互动模式展示区 -->
+        <div id="classroomStage" class="classroom-info-box hidden">
+          <h3>课堂互动进行中</h3>
+          <p id="classroomDescription">当前正在进行常规课堂互动，请根据老师指令答题或使用教具。</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* =========================================================
+       应用状态管理与存储键
+       ========================================================= */
+    const STORAGE_KEY_TOKEN = 'cloud_v2_student_token';
+    const STORAGE_KEY_COURSE_ID = 'cloud_v2_course_id';
+    const STORAGE_KEY_STUDENT_ID = 'cloud_v2_student_id';
+    const STORAGE_KEY_STUDENT_NAME = 'cloud_v2_student_name';
+    const STORAGE_KEY_COURSE_CODE = 'cloud_v2_course_code';
+    const STORAGE_KEY_ACTIVITY_SUBMISSIONS = 'cloud_v2_activity_submissions';
+
+    const state = {
+      studentToken: localStorage.getItem(STORAGE_KEY_TOKEN) || null,
+      courseId: localStorage.getItem(STORAGE_KEY_COURSE_ID) || null,
+      studentId: localStorage.getItem(STORAGE_KEY_STUDENT_ID) || null,
+      studentName: localStorage.getItem(STORAGE_KEY_STUDENT_NAME) || '',
+      courseCode: localStorage.getItem(STORAGE_KEY_COURSE_CODE) || '',
+      
+      course: null,
+      currentActivity: null,
+      activeView: 'join', // 'join' | 'home' | 'activity'
+      activeModeFilter: null, // 当前进入的模式筛选 'classroom' | 'vocabulary' | 'arithmetic'
+      
+      pollingTimer: null,
+      isPolling: false,
+      consecutiveErrors: 0,
+      isOffline: !navigator.onLine,
+      
+      // 本地缓存针对每个 activityId 提交记录，格式: { [activityId]: { submittedAnswer, correct, duplicate, clientEventId } }
+      activitySubmissions: (() => { try { const value = JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVITY_SUBMISSIONS) || '{}'); return value && typeof value === 'object' && !Array.isArray(value) ? value : {}; } catch (_) { return {}; } })()
+    };
+
+    /* =========================================================
+       网络请求封装与统一错误拦截
+       ========================================================= */
+    async function apiRequest(endpoint, options = {}) {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      };
+
+      if (state.studentToken) {
+        headers['Authorization'] = 'Bearer ' + state.studentToken;
+        headers['X-V2-Token'] = state.studentToken;
+      }
+
+      try {
+        const response = await fetch(endpoint, {
+          ...options,
+          headers
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          const message = (data && data.error) ? data.error : ('请求失败 (HTTP ' + response.status + ')');
+          const errorObj = new Error(message);
+          errorObj.status = response.status;
+          errorObj.data = data;
+          throw errorObj;
+        }
+
+        // 请求成功，恢复连接正常状态
+        if (state.consecutiveErrors > 0) {
+          state.consecutiveErrors = 0;
+          updateNetworkStatus(true);
+        }
+
+        return data;
+      } catch (err) {
+        if (!navigator.onLine || err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+          handleOfflineState();
+        } else {
+          state.consecutiveErrors++;
+          if (state.consecutiveErrors >= 3) {
+            updateNetworkStatus(false, '连接不稳定');
+          }
+        }
+        throw err;
+      }
+    }
+
+    /* =========================================================
+       UI 提示与网络状态显示
+       ========================================================= */
+    let noticeTimer = null;
+    function showNotice(message, type = 'info', duration = 3500) {
+      const bar = document.getElementById('noticeBar');
+      bar.textContent = message;
+      bar.className = 'show ' + type;
+      clearTimeout(noticeTimer);
+      noticeTimer = setTimeout(() => {
+        bar.className = '';
+      }, duration);
+    }
+
+    function updateNetworkStatus(online, customText) {
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+      const offlineBanner = document.getElementById('offlineWarningBanner');
+
+      if (!online) {
+        dot.className = 'status-dot offline';
+        text.textContent = customText || '离线中';
+        offlineBanner.className = 'visible';
+      } else {
+        dot.className = 'status-dot online';
+        text.textContent = customText || '就绪';
+        offlineBanner.className = '';
+      }
+    }
+
+    function handleOfflineState() {
+      state.isOffline = true;
+      updateNetworkStatus(false, '离线');
+      showNotice('网络已断开，请检查网络连接', 'error', 4000);
+    }
+
+    window.addEventListener('online', () => {
+      state.isOffline = false;
+      updateNetworkStatus(true, '已恢复');
+      showNotice('网络已恢复', 'success', 2500);
+      if (state.courseId && state.studentToken) {
+        pollCurrentActivity();
+      }
+    });
+
+    window.addEventListener('offline', () => {
+      handleOfflineState();
+    });
+
+    /* =========================================================
+       视图切换管理
+       ========================================================= */
+    function switchView(viewName) {
+      state.activeView = viewName;
+      document.getElementById('viewJoin').classList.add('hidden');
+      document.getElementById('viewHome').classList.add('hidden');
+      document.getElementById('viewActivity').classList.add('hidden');
+
+      const userDisplay = document.getElementById('userDisplay');
+      const btnExitCourse = document.getElementById('btnExitCourse');
+
+      if (viewName === 'join') {
+        document.getElementById('viewJoin').classList.remove('hidden');
+        userDisplay.classList.add('hidden');
+        btnExitCourse.classList.add('hidden');
+        stopPolling();
+      } else if (viewName === 'home') {
+        document.getElementById('viewHome').classList.remove('hidden');
+        userDisplay.classList.remove('hidden');
+        btnExitCourse.classList.remove('hidden');
+        startPolling();
+      } else if (viewName === 'activity') {
+        document.getElementById('viewActivity').classList.remove('hidden');
+        userDisplay.classList.remove('hidden');
+        btnExitCourse.classList.remove('hidden');
+        startPolling();
+      }
+    }
+
+    /* =========================================================
+       学生加入课程逻辑
+       ========================================================= */
+    async function handleJoinSubmit(e) {
+      e.preventDefault();
+      const codeInput = document.getElementById('inputCourseCode');
+      const nameInput = document.getElementById('inputStudentName');
+      const btnSubmit = document.getElementById('btnJoinSubmit');
+
+      const courseCode = codeInput.value.trim().toUpperCase();
+      const studentName = nameInput.value.trim();
+
+      if (!courseCode || courseCode.length !== 6) {
+        showNotice('请输入6位英文字母或数字课程码', 'warning');
+        codeInput.focus();
+        return;
+      }
+      if (!studentName) {
+        showNotice('请输入您的真实姓名', 'warning');
+        nameInput.focus();
+        return;
+      }
+
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = '正在进入课堂...';
+
+      try {
+        const res = await apiRequest('/api/v2/courses/join', {
+          method: 'POST',
+          body: JSON.stringify({
+            courseCode,
+            studentName
+          })
+        });
+
+        // 成功加入，保存鉴权凭据与基本信息
+        state.studentToken = res.studentToken;
+        state.studentId = res.studentId;
+        state.courseId = res.course.id;
+        state.studentName = studentName;
+        state.courseCode = res.course.courseCode || courseCode;
+        state.course = res.course;
+
+        localStorage.setItem(STORAGE_KEY_TOKEN, state.studentToken);
+        localStorage.setItem(STORAGE_KEY_COURSE_ID, state.courseId);
+        localStorage.setItem(STORAGE_KEY_STUDENT_ID, state.studentId);
+        localStorage.setItem(STORAGE_KEY_STUDENT_NAME, state.studentName);
+        localStorage.setItem(STORAGE_KEY_COURSE_CODE, state.courseCode);
+
+        document.getElementById('studentNameLabel').textContent = studentName;
+        showNotice('成功加入课程: ' + res.course.title, 'success');
+        
+        renderHome(res.course);
+        switchView('home');
+      } catch (err) {
+        let msg = '加入课程失败，请核对课程码';
+        if (err.data && err.data.error) {
+          msg = err.data.error;
+        }
+        showNotice(msg, 'error');
+      } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = '进入课堂';
+      }
+    }
+
+    function handleExitCourse(force = false) {
+      if (!force && !confirm('确定要退出当前课堂吗？退出后可重新输入课程码加入。')) {
+        return;
+      }
+      localStorage.removeItem(STORAGE_KEY_TOKEN);
+      localStorage.removeItem(STORAGE_KEY_COURSE_ID);
+      localStorage.removeItem(STORAGE_KEY_STUDENT_ID);
+      localStorage.removeItem(STORAGE_KEY_STUDENT_NAME);
+      localStorage.removeItem(STORAGE_KEY_COURSE_CODE);
+
+      state.studentToken = null;
+      state.courseId = null;
+      state.studentId = null;
+      state.studentName = '';
+      state.course = null;
+      state.currentActivity = null;
+      state.activitySubmissions = {};
+      localStorage.removeItem(STORAGE_KEY_ACTIVITY_SUBMISSIONS);
+
+      document.getElementById('inputCourseCode').value = '';
+      switchView('join');
+      showNotice('已退出当前课程', 'info');
+    }
+
+    /* =========================================================
+       课程首页渲染与同级三模式控制
+       ========================================================= */
+    function renderHome(course) {
+      if (!course) return;
+      document.getElementById('homeCourseTitle').textContent = course.title || '课堂';
+      document.getElementById('homeTeacherName').textContent = course.teacherName || '任课教师';
+      document.getElementById('homeStudentName').textContent = state.studentName || '学生';
+      document.getElementById('homeCourseCode').textContent = course.courseCode || state.courseCode || '------';
+      document.getElementById('studentNameLabel').textContent = state.studentName;
+
+      const modes = course.modes || { classroom: true, vocabulary: false, arithmetic: false };
+
+      // 渲染三模式同级卡片
+      updateModeCard('modeCardClassroom', 'badgeClassroom', 'btnEnterClassroom', modes.classroom, 'classroom');
+      updateModeCard('modeCardVocab', 'badgeVocab', 'btnEnterVocab', modes.vocabulary, 'vocabulary');
+      updateModeCard('modeCardArithmetic', 'badgeArithmetic', 'btnEnterArithmetic', modes.arithmetic, 'arithmetic');
+
+      // 活动横幅
+      updateActivityBanner();
+    }
+
+    function updateModeCard(cardId, badgeId, btnId, isEnabled, modeType) {
+      const card = document.getElementById(cardId);
+      const badge = document.getElementById(badgeId);
+      const btn = document.getElementById(btnId);
+
+      if (isEnabled) {
+        card.className = 'mode-card enabled mode-' + modeType;
+        badge.className = 'mode-badge enabled-badge';
+        badge.textContent = '已启用';
+        btn.disabled = false;
+        btn.textContent = '进入模式';
+      } else {
+        card.className = 'mode-card disabled mode-' + modeType;
+        badge.className = 'mode-badge disabled-badge';
+        badge.textContent = '教师未开启';
+        btn.disabled = true;
+        btn.textContent = '模式未开启';
+      }
+    }
+
+    function updateActivityBanner() {
+      const banner = document.getElementById('activeActivityBanner');
+      const title = document.getElementById('activeActivityTitle');
+      const subtitle = document.getElementById('activeActivitySubtitle');
+      const act = state.currentActivity;
+
+      if (!act) {
+        banner.classList.add('hidden');
+        return;
+      }
+
+      banner.classList.remove('hidden');
+      const modeNames = {
+        vocabulary: '背单词活动',
+        arithmetic: '算数速算练习',
+        classroom: '课堂常规互动'
+      };
+      const mName = modeNames[act.modeType] || act.modeType;
+      title.textContent = '教师正在进行: ' + mName;
+
+      if (act.modeType === 'vocabulary') {
+        const word = (act.question && act.question.word) || '新单词';
+        subtitle.textContent = '题目单词: [' + word + ']，点击立即前往作答';
+      } else if (act.modeType === 'arithmetic') {
+        const expr = (act.question && act.question.expression) || '算式题目';
+        subtitle.textContent = '计算题目: [' + expr + ']，点击立即输入答案';
+      } else {
+        subtitle.textContent = '点击立即参与课堂互动';
+      }
+    }
+
+    function openModeWorkspace(modeType) {
+      const modes = (state.course && state.course.modes) || {};
+      if (!modes[modeType]) {
+        showNotice('该模式已被老师禁用，无法进入', 'warning');
+        return;
+      }
+      state.activeModeFilter = modeType;
+      switchView('activity');
+      renderActivityWorkspace();
+    }
+
+    function enterCurrentActivity() {
+      if (!state.currentActivity) {
+        showNotice('暂无活跃的活动', 'info');
+        return;
+      }
+      state.activeModeFilter = state.currentActivity.modeType;
+      switchView('activity');
+      renderActivityWorkspace();
+    }
+
+    function backToHome() {
+      state.activeModeFilter = null;
+      switchView('home');
+      if (state.course) {
+        renderHome(state.course);
+      }
+    }
+
+    /* =========================================================
+       活动工作区渲染与答题逻辑
+       ========================================================= */
+    function renderActivityWorkspace() {
+      const badge = document.getElementById('activityBadge');
+      const waitingState = document.getElementById('waitingState');
+      const vocabStage = document.getElementById('vocabStage');
+      const arithmeticStage = document.getElementById('arithmeticStage');
+      const classroomStage = document.getElementById('classroomStage');
+
+      const act = state.currentActivity;
+      const filter = state.activeModeFilter;
+
+      const modeTitles = {
+        vocabulary: '背单词训练',
+        arithmetic: '算数口算练习',
+        classroom: '课堂常规互动'
+      };
+      badge.textContent = modeTitles[filter] || '课堂活动';
+
+      // 检查当前活动是否与当前进入的模式一致
+      if (!act || (filter && act.modeType !== filter)) {
+        // 当前模式下暂无进行中的活动
+        waitingState.classList.remove('hidden');
+        vocabStage.classList.add('hidden');
+        arithmeticStage.classList.add('hidden');
+        classroomStage.classList.add('hidden');
+        return;
+      }
+
+      waitingState.classList.add('hidden');
+
+      if (act.modeType === 'vocabulary') {
+        vocabStage.classList.remove('hidden');
+        arithmeticStage.classList.add('hidden');
+        classroomStage.classList.add('hidden');
+        renderVocabularyActivity(act);
+      } else if (act.modeType === 'arithmetic') {
+        vocabStage.classList.add('hidden');
+        arithmeticStage.classList.remove('hidden');
+        classroomStage.classList.add('hidden');
+        renderArithmeticActivity(act);
+      } else if (act.modeType === 'classroom') {
+        vocabStage.classList.add('hidden');
+        arithmeticStage.classList.add('hidden');
+        classroomStage.classList.remove('hidden');
+      }
+    }
+
+    /* 渲染背单词模式 */
+    function renderVocabularyActivity(activity) {
+      const q = activity.question || {};
+      const wordElem = document.getElementById('vocabWord');
+      const optionsContainer = document.getElementById('vocabOptions');
+      const feedback = document.getElementById('vocabFeedback');
+
+      wordElem.textContent = q.word || 'Vocabulary';
+      optionsContainer.innerHTML = '';
+
+      const options = Array.isArray(q.options) ? q.options : [];
+      const letters = ['A', 'B', 'C', 'D'];
+
+      const prevSubmission = state.activitySubmissions[activity.id];
+
+      // 如果之前已经提交过此题，显示之前的作答结果
+      if (prevSubmission) {
+        showFeedback(feedback, prevSubmission.correct, prevSubmission.duplicate, '已完成作答');
+      } else {
+        feedback.className = 'result-feedback-card hidden';
+        feedback.innerHTML = '';
+      }
+
+      options.forEach((optText, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'vocab-option-btn';
+
+        // 如果已答过，根据结果高亮
+        if (prevSubmission) {
+          btn.disabled = true;
+          if (Number(prevSubmission.submittedAnswer) === index) {
+            btn.classList.add('selected');
+            if (prevSubmission.correct) {
+              btn.classList.add('status-correct');
+            } else {
+              btn.classList.add('status-wrong');
+            }
+          }
+        }
+
+        const letterBadge = document.createElement('span');
+        letterBadge.className = 'opt-letter';
+        letterBadge.textContent = letters[index] || (index + 1);
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'opt-label';
+        textSpan.textContent = optText;
+
+        btn.appendChild(letterBadge);
+        btn.appendChild(textSpan);
+
+        btn.onclick = () => handleVocabAnswerSubmit(activity.id, index);
+
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    async function handleVocabAnswerSubmit(activityId, optionIndex) {
+      const prev = state.activitySubmissions[activityId];
+      if (prev) {
+        showNotice('您已提交过本题答案，无需重复提交', 'warning');
+        return;
+      }
+
+      // 生成稳定的客户端幂等事件 ID
+      const clientEventId = 'vocab-' + activityId + '-' + state.studentId + '-' + optionIndex;
+
+      // 禁用所有选项按钮防连击
+      const buttons = document.querySelectorAll('.vocab-option-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      try {
+        const res = await apiRequest(`/api/v2/courses/${state.courseId}/activities/${activityId}/answers`, {
+          method: 'POST',
+          body: JSON.stringify({
+            answer: optionIndex,
+            clientEventId
+          })
+        });
+
+        // 保存本次提交记录
+        state.activitySubmissions[activityId] = {
+          submittedAnswer: optionIndex,
+          correct: res.correct,
+          duplicate: res.duplicate,
+          clientEventId
+        };
+        localStorage.setItem(STORAGE_KEY_ACTIVITY_SUBMISSIONS, JSON.stringify(state.activitySubmissions));
+
+        // 重新渲染高亮
+        const act = state.currentActivity;
+        if (act && act.id === activityId) {
+          renderVocabularyActivity(act);
+        }
+
+        if (res.duplicate) {
+          showNotice('重复提交，已为您展示历史判定结果', 'warning');
+        } else if (res.correct) {
+          showNotice('回答正确！做得好！', 'success');
+        } else {
+          showNotice('回答错误，继续加油！', 'error');
+        }
+      } catch (err) {
+        buttons.forEach(b => b.disabled = false);
+        const msg = (err.data && err.data.error) ? err.data.error : err.message;
+        showNotice('提交失败: ' + msg, 'error');
+      }
+    }
+
+    /* 渲染算数口算模式 (上半题目，下半大号输入答案/提交/结果) */
+    function renderArithmeticActivity(activity) {
+      const q = activity.question || {};
+      const exprElem = document.getElementById('arithmeticExpression');
+      const input = document.getElementById('arithmeticAnswerInput');
+      const btnSubmit = document.getElementById('btnSubmitArithmetic');
+      const feedback = document.getElementById('arithmeticFeedback');
+
+      const expr = q.expression || (q.answer !== undefined ? `计算结果为 ${q.answer} 的算式` : '口算题');
+      exprElem.textContent = expr.includes('=') ? expr : `${expr} = ?`;
+
+      const prevSubmission = state.activitySubmissions[activity.id];
+
+      if (prevSubmission) {
+        input.value = prevSubmission.submittedAnswer;
+        input.disabled = true;
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<span>已提交作答</span>';
+        showFeedback(feedback, prevSubmission.correct, prevSubmission.duplicate, `已提交答案: ${prevSubmission.submittedAnswer}`);
+      } else {
+        input.disabled = false;
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '<span>提交答案</span>';
+        feedback.className = 'result-feedback-card hidden';
+        feedback.innerHTML = '';
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    async function handleArithmeticSubmit(e) {
+      e.preventDefault();
+      const act = state.currentActivity;
+      if (!act || act.modeType !== 'arithmetic') {
+        showNotice('当前没有进行中的算数活动', 'warning');
+        return;
+      }
+
+      const input = document.getElementById('arithmeticAnswerInput');
+      const btnSubmit = document.getElementById('btnSubmitArithmetic');
+      const answerVal = input.value.trim();
+
+      if (answerVal === '') {
+        showNotice('请输入计算结果后再提交', 'warning');
+        input.focus();
+        return;
+      }
+
+      const prev = state.activitySubmissions[act.id];
+      if (prev) {
+        showNotice('您已提交过本题答案', 'warning');
+        return;
+      }
+
+      const numericAnswer = Number(answerVal);
+      const answerToSubmit = isNaN(numericAnswer) ? answerVal : numericAnswer;
+      // 客户端唯一事件ID
+      const clientEventId = 'arith-' + act.id + '-' + state.studentId + '-' + answerVal;
+
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span>正在提交...</span>';
+
+      try {
+        const res = await apiRequest(`/api/v2/courses/${state.courseId}/activities/${act.id}/answers`, {
+          method: 'POST',
+          body: JSON.stringify({
+            answer: answerToSubmit,
+            clientEventId
+          })
+        });
+
+        state.activitySubmissions[act.id] = {
+          submittedAnswer: answerToSubmit,
+          correct: res.correct,
+          duplicate: res.duplicate,
+          clientEventId
+        };
+        localStorage.setItem(STORAGE_KEY_ACTIVITY_SUBMISSIONS, JSON.stringify(state.activitySubmissions));
+
+        if (state.currentActivity && state.currentActivity.id === act.id) {
+          renderArithmeticActivity(state.currentActivity);
+        }
+
+        if (res.duplicate) {
+          showNotice('重复提交，已记录原答案', 'warning');
+        } else if (res.correct) {
+          showNotice('太棒了，计算正确！', 'success');
+        } else {
+          showNotice('计算有误，再接再厉！', 'error');
+        }
+      } catch (err) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '<span>提交答案</span>';
+        const msg = (err.data && err.data.error) ? err.data.error : err.message;
+        showNotice('提交失败: ' + msg, 'error');
+      }
+    }
+
+    function showFeedback(container, isCorrect, isDuplicate, extraInfo) {
+      container.classList.remove('hidden');
+      if (isDuplicate) {
+        container.className = 'result-feedback-card duplicate';
+        container.innerHTML = `
+          <div class="feedback-icon">⚠️</div>
+          <div class="feedback-title">已提交过该题 (重复判定)</div>
+          <div class="feedback-detail">${extraInfo} · 结果: ${isCorrect ? '正确 ✓' : '错误 ✗'}</div>
+        `;
+      } else if (isCorrect) {
+        container.className = 'result-feedback-card correct';
+        container.innerHTML = `
+          <div class="feedback-icon">✓</div>
+          <div class="feedback-title">回答正确</div>
+          <div class="feedback-detail">${extraInfo}</div>
+        `;
+      } else {
+        container.className = 'result-feedback-card wrong';
+        container.innerHTML = `
+          <div class="feedback-icon">✗</div>
+          <div class="feedback-title">回答不正确</div>
+          <div class="feedback-detail">${extraInfo}</div>
+        `;
+      }
+    }
+
+    /* =========================================================
+       轮询当前活动与课程状态 (GET /api/v2/courses/:id/current)
+       ========================================================= */
+    async function pollCurrentActivity() {
+      if (state.isPolling || !state.courseId || !state.studentToken) return;
+      state.isPolling = true;
+      const courseId = state.courseId;
+
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+
+      try {
+        // 轻微呼吸脉冲显示轮询活跃
+        dot.className = 'status-dot polling';
+        text.textContent = '监测中';
+
+        // 并行或者顺序刷新活动与课程配置
+        const currentData = await apiRequest(`/api/v2/courses/${state.courseId}/current`);
+        if (state.courseId !== courseId) return;
+        const nextActivity = currentData.activity || null;
+
+        // 如果活动发生改变 (发布了新题或结束)
+        const oldActId = state.currentActivity ? state.currentActivity.id : null;
+        const newActId = nextActivity ? nextActivity.id : null;
+
+        if (oldActId !== newActId) {
+          state.currentActivity = nextActivity;
+          if (nextActivity) {
+            showNotice('教师发布了新活动，请准备作答！', 'info');
+          }
+          if (state.activeView === 'home') {
+            updateActivityBanner();
+          } else if (state.activeView === 'activity') {
+            renderActivityWorkspace();
+          }
+        }
+
+        // 周期性同步 home 模式开关
+        const homeData = await apiRequest(`/api/v2/courses/${state.courseId}/home`);
+        if (state.courseId !== courseId) return;
+        if (homeData && homeData.course) {
+          state.course = homeData.course;
+          if (state.activeView === 'home') {
+            renderHome(state.course);
+          }
+        }
+
+        setTimeout(() => {
+          if (!state.isOffline) {
+            dot.className = 'status-dot online';
+            text.textContent = '在线';
+          }
+        }, 600);
+
+      } catch (err) {
+        // 401 说明 token 失效或已被踢出
+        if (err.status === 401) {
+          showNotice('登录会话已过期，请重新加入课堂', 'error');
+          handleExitCourse(true);
+        }
+      } finally {
+        state.isPolling = false;
+      }
+    }
+
+    function startPolling() {
+      stopPolling();
+      pollCurrentActivity();
+      state.pollingTimer = setInterval(pollCurrentActivity, 2500);
+    }
+
+    function stopPolling() {
+      if (state.pollingTimer) {
+        clearInterval(state.pollingTimer);
+        state.pollingTimer = null;
+      }
+    }
+
+    /* =========================================================
+       初始化入口
+       ========================================================= */
+    async function init() {
+      // 检查是否有本地缓存的加入状态
+      if (state.courseId && state.studentToken) {
+        document.getElementById('studentNameLabel').textContent = state.studentName || '学生';
+        try {
+          const homeData = await apiRequest(`/api/v2/courses/${state.courseId}/home`);
+          if (homeData && homeData.course) {
+            state.course = homeData.course;
+            renderHome(state.course);
+            switchView('home');
+            showNotice('已自动恢复课堂会话', 'success');
+            return;
+          }
+        } catch (err) {
+          console.warn('恢复登录凭据失败，重置到加入界面:', err);
+          localStorage.removeItem(STORAGE_KEY_TOKEN);
+          localStorage.removeItem(STORAGE_KEY_COURSE_ID);
+          state.studentToken = null;
+          state.courseId = null;
+        }
+      }
+
+      // 未登录或登录凭据失效，进入加入界面
+      switchView('join');
+    }
+
+    // 页面加载完成后启动
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

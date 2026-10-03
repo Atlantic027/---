@@ -1,0 +1,17 @@
+#pragma once
+
+// Copy this file to classroom_config.h and fill in the local values.
+// Do not commit the real classroom_config.h; it contains credentials.
+#define WIFI_SSID "your-router-ssid"
+#define WIFI_PASSWORD "your-router-password"
+
+#define SERVER_BASE_URL "http://192.168.1.100:8080"
+#define DEVICE_TOKEN "replace-with-device-token"
+// Leave empty to identify this terminal from the ESP32 eFuse MAC automatically.
+#define DEVICE_ID ""
+
+// Optional V2 adapter. Keep disabled until the server implements the contract.
+#define V2_MODE_ENABLED false
+#define V2_API_BASE_PATH "/api/v2"
+#define V2_COURSE_CODE ""
+#define V2_STUDENT_NAME ""
